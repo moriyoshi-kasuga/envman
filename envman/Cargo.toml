@@ -1,0 +1,18 @@
+[package]
+name = "envman"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Rust crates to manage virtual environments"
+
+[lib]
+
+[features]
+default = ["derive"]
+derive = ["dep:envman_derive"]
+
+[dependencies]
+envman_derive = { path = "../envman_derive", optional = true }
+thiserror = "^1.0"
