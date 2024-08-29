@@ -42,14 +42,14 @@ use envman::EnvMan;
 #[tokio::main]
 async fn main() {
     // initialize
-    let _ = &*ENVIROMENTS;
+    let _ = &*ENVIRONMENTS;
 
-    println!("API_URL: {}", ENVIROMENTS.api_url);
+    println!("API_URL: {}", ENVIRONMENTS.api_url);
 }
 
-static ENVIROMENTS: LazyLock<Foo> = LazyLock::new(|| Foo::load().unwrap());
+static ENVIRONMENTS: LazyLock<Foo> = LazyLock::new(|| Foo::load().unwrap());
 
-#[derive(envman::EnvMan)]
+#[derive(EnvMan)]
 struct Foo {
     api_url: String,
 }
