@@ -37,8 +37,8 @@ pub trait EnvMan {
 
 #[derive(Error, Debug)]
 pub enum EnvManError {
-    #[error("failed to read environment variable of {0}")]
-    NotFound(#[from] std::env::VarError),
+    #[error("failed to read environment variable of {key}")]
+    NotFound { key: String },
     #[error("failed to parse environment variable of {key}")]
     Parse { key: String },
 }

@@ -69,7 +69,7 @@ mod tests {
 
     #[derive(EnvMan, Debug, PartialEq)]
     struct TestOption {
-        secret_1: std::option::Option<String>,
+        secret_1: Option<String>,
         #[envman(default = "5")]
         secret_2: Option<String>,
     }

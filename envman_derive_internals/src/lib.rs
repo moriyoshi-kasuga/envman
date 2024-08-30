@@ -53,7 +53,7 @@ pub fn derive_envman_internal(
                     Ok(v) => Ok(v),
                     Err(e) => match #opt {
                         Some(v) => Ok(String::from(v)),
-                        None => Err(envman::EnvManError::NotFound(e)),
+                        None => Err(envman::EnvManError::NotFound { key: #rename.to_string() }),
                     }
                 }?.parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() })?
             }
