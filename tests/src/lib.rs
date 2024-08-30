@@ -66,4 +66,22 @@ mod tests {
             }
         );
     }
+
+    #[derive(EnvMan, Debug, PartialEq)]
+    struct TestOption {
+        secret_1: std::option::Option<String>,
+        #[envman(default = "5")]
+        secret_2: Option<String>,
+    }
+
+    #[test]
+    fn option() {
+        assert_eq!(
+            TestOption::load().unwrap(),
+            TestOption {
+                secret_1: None,
+                secret_2: Some(String::from("5"))
+            }
+        );
+    }
 }

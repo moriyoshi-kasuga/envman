@@ -1,8 +1,8 @@
 use proc_macro2::Ident;
-use syn::{Field, LitStr, Result};
+use syn::{Field, LitStr, PathSegment, Result, Type};
 
 /// Find the value of a #[envman(name = "...")] attribute.
-pub fn attr(field: &Field) -> Result<(String, Option<String>)> {
+pub fn attr(field: &Field) -> Result<(String, Option<String>, bool)> {
     let mut rename = None;
     let mut default = None;
 
@@ -31,11 +31,25 @@ pub fn attr(field: &Field) -> Result<(String, Option<String>)> {
             Err(meta.error("unsupported attribute"))
         })?;
     }
-
     Ok((
         rename.unwrap_or_else(|| unraw(field.ident.as_ref().unwrap())),
         default,
+        is_option(&field.ty),
     ))
+}
+
+fn is_option(ty: &Type) -> bool {
+    match get_last_path_segment(ty) {
+        Some(seg) => seg.ident == "Option",
+        _ => false,
+    }
+}
+
+fn get_last_path_segment(ty: &Type) -> Option<&PathSegment> {
+    match ty {
+        Type::Path(path) => path.path.segments.last(),
+        _ => None,
+    }
 }
 
 fn unraw(ident: &Ident) -> String {

@@ -34,19 +34,29 @@ pub fn derive_envman_internal(
 
     let mut body = vec![];
 
-    for (rename, opt) in field_attrs {
+    for (rename, opt, is_opt) in field_attrs {
         let opt = match opt {
             Some(text) => quote! { Some(#text) },
             None => quote! { None::<String> },
         };
-        let q = quote! {
-            match std::env::var(#rename) {
-                Ok(v) => Ok(v),
-                Err(e) => match #opt {
-                    Some(v) => Ok(String::from(v)),
-                    None => Err(envman::EnvManError::NotFound(e)),
-                }
-            }.unwrap().parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() }).unwrap()
+        let q = if is_opt {
+            quote! { match match std::env::var(#rename) {
+                Ok(v) => Some(v),
+                Err(_) => #opt.map(String::from),
+            } {
+                Some(v) => Some(v.parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() })?),
+                None => None,
+            } }
+        } else {
+            quote! {
+                match std::env::var(#rename) {
+                    Ok(v) => Ok(v),
+                    Err(e) => match #opt {
+                        Some(v) => Ok(String::from(v)),
+                        None => Err(envman::EnvManError::NotFound(e)),
+                    }
+                }?.parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() })?
+            }
         };
         body.push(q);
     }
