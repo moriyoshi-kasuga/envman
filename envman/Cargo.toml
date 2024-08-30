@@ -18,5 +18,5 @@ default = ["derive"]
 derive = ["dep:envman_derive"]
 
 [dependencies]
-envman_derive = { version = "0.3.1", path = "../envman_derive", optional = true }
+envman_derive = { version = "^0.3", path = "../envman_derive", optional = true }
 thiserror = "^1.0"

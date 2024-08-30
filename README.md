@@ -6,7 +6,7 @@ This crate adds a macro for easy management of environment variables.
 
 ```toml
 [dependencies]
-envman = "0.3.1"
+envman = "0.3.2"
 ```
 
 Version requirement: rustc 1.80+
@@ -71,4 +71,4 @@ pub struct Environments {
 
 Licensed under
 
-- MIT license (<https://github.com/moriyoshi-kasuga/envman/blob/main/LICENSE> or <http://opensource.org/licenses/MIT>)
+- [MIT license](https://github.com/moriyoshi-kasuga/envman/blob/main/LICENSE)

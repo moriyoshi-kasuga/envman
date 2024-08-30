@@ -1,8 +1,15 @@
 [package]
-name = "tests"
+name = "envman_test"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+description = "Test utilities for envman."
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+readme = "../README.md"
+categories.workspace = true
+keywords.workspace = true
 
 [dependencies]
-envman = { path = "../envman" }
+envman = { version = "^0.3", path = "../envman" }
