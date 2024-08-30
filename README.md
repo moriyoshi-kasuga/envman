@@ -1,20 +1,25 @@
 # envman
 
-## About
-
 This crate adds a macro for easy management of environment variables.
 
 ## Install
 
 ```toml
 [dependencies]
-envman = { git = "https://github.com/moriyoshi-kasuga/envman", branch = "main", version = "0.2" }
+envman = "0.3.1"
 ```
+
+Version requirement: rustc 1.80+
 
 ## Example
 
 ```rust
 use envman::EnvMan;
+
+unsafe {
+  std::env::set_var("F0", "-1");
+  std::env::set_var("f1", "1");
+}
 
 // The type of field can be set if FromStr is implemented
 #[derive(EnvMan)]
@@ -27,12 +32,16 @@ struct Foo {
   f_o: Option<i32>
 }
 
-let foo = Foo::load().unwrap();
 // If rename is not set, it will be an upper case
-let f0 = foo.f0; // This value is taken from “F0”.
-let f_1 = foo.f_1; // This value is taken from “f1”.
-let f_n = foo.f_n; // This value is taken from “F_N” and if it is not set, it will be set to “default value”.
-let f_o = foo.f_o; // This value is taken from “F_O” and if it is not set, it will be set to None.
+let foo = Foo::load().unwrap();
+// This value is taken from “F0”.
+let f0 = foo.f0;
+// This value is taken from “f1”.
+let f_1 = foo.f_1;
+// This value is taken from “F_N” and if it is not set, it will be set to “default value”.
+let f_n = foo.f_n;
+// This value is taken from “F_O” and if it is not set, it will be set to None.
+let f_o = foo.f_o;
 ```
 
 ## Usecase
@@ -42,8 +51,7 @@ use std::sync::LazyLock;
 
 use envman::EnvMan;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     // initialize
     let _ = &*ENVIRONMENTS;
 
@@ -58,3 +66,9 @@ pub struct Environments {
     api_url: String,
 }
 ```
+
+## License
+
+Licensed under
+
+- MIT license (<https://github.com/moriyoshi-kasuga/envman/blob/main/LICENSE> or <http://opensource.org/licenses/MIT>)

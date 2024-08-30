@@ -3,9 +3,13 @@ name = "envman_derive_internals"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-authors.workspace = true
-license.workspace = true
 description = "derive macro implementation for envman crate"
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+readme = "../README.md"
+categories.workspace = true
+keywords.workspace = true
 
 [dependencies]
 proc-macro2 = "1.0"
