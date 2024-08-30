@@ -1,10 +1,10 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{Data, DataStruct, DeriveInput, Error, Fields, FieldsNamed, Result};
+use syn::{Data, DataStruct, DeriveInput, Error, Fields, FieldsNamed};
 
 mod attr;
 
-pub fn derive_envman(input: DeriveInput) -> Result<TokenStream> {
+pub fn derive_envman(input: DeriveInput) -> syn::Result<TokenStream> {
     match &input.data {
         Data::Struct(DataStruct {
             fields: Fields::Named(fields),
@@ -17,26 +17,44 @@ pub fn derive_envman(input: DeriveInput) -> Result<TokenStream> {
     }
 }
 
-pub fn derive_envman_internal(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStream> {
+pub fn derive_envman_internal(
+    input: &DeriveInput,
+    fields: &FieldsNamed,
+) -> syn::Result<TokenStream> {
     let ident = &input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
-    let fieldname = fields.named.iter().map(|f| &f.ident).collect::<Vec<_>>();
-    let fieldstr = fields
+    let field_name = fields.named.iter().map(|f| &f.ident).collect::<Vec<_>>();
+
+    let field_attrs = fields
         .named
         .iter()
-        .map(attr::name_of_field)
-        .collect::<Result<Vec<_>>>()?;
+        .map(attr::attr)
+        .collect::<syn::Result<Vec<_>>>()?;
+
+    let mut body = vec![];
+
+    for (rename, opt) in field_attrs {
+        let opt = match opt {
+            Some(text) => quote! { Some(#text) },
+            None => quote! { None::<String> },
+        };
+        let q = quote! {
+            match std::env::var(#rename) {
+                Ok(v) => Ok(v),
+                Err(e) => match #opt {
+                    Some(v) => Ok(String::from(v)),
+                    None => Err(envman::EnvManError::NotFound(e)),
+                }
+            }.unwrap().parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() }).unwrap()
+        };
+        body.push(q);
+    }
 
     let expr = quote! {
-        impl #impl_generics ::envman::EnvMan for #ident #ty_generics #where_clause {
-            fn load() -> Result<Self, ::envman::EnvManError> {
-                Ok(Self {
-                    #(
-                        #fieldname : std::env::var(#fieldstr).map_err(|e| ::envman::EnvManError::NotFound(e)).unwrap().parse()
-                            .map_err(|e| ::envman::EnvManError::Parse { key: #fieldstr.to_string() }).unwrap(),
-                    )*
-                })
+        impl #impl_generics envman::EnvMan for #ident #ty_generics #where_clause {
+            fn load() -> Result<Self, envman::EnvManError> {
+                Ok(Self { #( #field_name: #body, )* })
             }
         }
     };

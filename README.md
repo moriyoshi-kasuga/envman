@@ -8,7 +8,7 @@ This crate adds a macro for easy management of environment variables.
 
 ```toml
 [dependencies]
-envman = { git = "https://github.com/moriyoshi-kasuga/envman", branch = "main", version = "0.1" }
+envman = { git = "https://github.com/moriyoshi-kasuga/envman", branch = "main", version = "0.2" }
 ```
 
 ## Example
@@ -51,6 +51,7 @@ static ENVIRONMENTS: LazyLock<Foo> = LazyLock::new(|| Foo::load().unwrap());
 
 #[derive(EnvMan)]
 struct Foo {
+    #[envman(default = "https://api.example.com")]
     api_url: String,
 }
 ```

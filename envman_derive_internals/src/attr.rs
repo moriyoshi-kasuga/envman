@@ -1,11 +1,12 @@
 use proc_macro2::Ident;
-use syn::{Attribute, Field, LitStr, Result};
+use syn::{Field, LitStr, Result};
 
-/// Find the value of a #[envman(rename = "...")] attribute.
-fn attr_rename(attrs: &[Attribute]) -> Result<Option<String>> {
+/// Find the value of a #[envman(name = "...")] attribute.
+pub fn attr(field: &Field) -> Result<(String, Option<String>)> {
     let mut rename = None;
+    let mut default = None;
 
-    for attr in attrs {
+    for attr in &field.attrs {
         if !attr.path().is_ident("envman") {
             continue;
         }
@@ -14,23 +15,27 @@ fn attr_rename(attrs: &[Attribute]) -> Result<Option<String>> {
             if meta.path.is_ident("rename") {
                 let s: LitStr = meta.value()?.parse()?;
                 if rename.is_some() {
-                    return Err(meta.error("duplicate rename attribute"));
+                    return Err(meta.error(String::from("duplicate rename attribute")));
                 }
                 rename = Some(s.value());
-                Ok(())
-            } else {
-                Err(meta.error("unsupported attribute"))
+                return Ok(());
             }
+            if meta.path.is_ident("default") {
+                let s: LitStr = meta.value()?.parse()?;
+                if default.is_some() {
+                    return Err(meta.error(String::from("duplicate default attribute")));
+                }
+                default = Some(s.value());
+                return Ok(());
+            }
+            Err(meta.error("unsupported attribute"))
         })?;
     }
 
-    Ok(rename)
-}
-
-/// Determine the name of a field, respecting a rename attribute.
-pub fn name_of_field(field: &Field) -> Result<String> {
-    let rename = attr_rename(&field.attrs)?;
-    Ok(rename.unwrap_or_else(|| unraw(field.ident.as_ref().unwrap())))
+    Ok((
+        rename.unwrap_or_else(|| unraw(field.ident.as_ref().unwrap())),
+        default,
+    ))
 }
 
 fn unraw(ident: &Ident) -> String {

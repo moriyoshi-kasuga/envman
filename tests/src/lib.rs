@@ -1,27 +1,68 @@
 #[cfg(test)]
 mod tests {
-
     use envman::EnvMan;
 
     #[derive(EnvMan, Debug, PartialEq)]
-    #[allow(unused)]
-    struct Foo {
-        f0: i32,
-        #[envman(rename = "f1")]
-        f_n: String,
+    struct Normal {
+        db_url: String,
+        db_max_conn: u8,
     }
 
     #[test]
-    fn test() {
+    fn normal() {
         unsafe {
-            std::env::set_var("F0", "5");
-            std::env::set_var("f1", "saikou");
+            std::env::set_var("DB_URL", "mysql://example");
+            std::env::set_var("DB_MAX_CONN", "5");
         }
         assert_eq!(
-            Foo::load().unwrap(),
-            Foo {
-                f0: 5,
-                f_n: String::from("saikou")
+            Normal::load().unwrap(),
+            Normal {
+                db_url: String::from("mysql://example"),
+                db_max_conn: 5
+            }
+        );
+    }
+
+    #[derive(EnvMan, Debug, PartialEq)]
+    struct Rename {
+        #[envman(rename = "CORE_DB_URL")]
+        db_url_1: String,
+        #[envman(rename = "TRANSACTION_DB_URL")]
+        db_url_2: String,
+    }
+
+    #[test]
+    fn rename() {
+        unsafe {
+            std::env::set_var("CORE_DB_URL", "mysql://example.1");
+            std::env::set_var("TRANSACTION_DB_URL", "mysql://example.2");
+        }
+        assert_eq!(
+            Rename::load().unwrap(),
+            Rename {
+                db_url_1: String::from("mysql://example.1"),
+                db_url_2: String::from("mysql://example.2")
+            }
+        );
+    }
+
+    #[derive(EnvMan, Debug, PartialEq)]
+    struct TestDefault {
+        redis_url: String,
+        #[envman(default = "5")]
+        redis_max_conn: u8,
+    }
+
+    #[test]
+    fn default() {
+        unsafe {
+            std::env::set_var("REDIS_URL", "redis://example");
+        }
+        assert_eq!(
+            TestDefault::load().unwrap(),
+            TestDefault {
+                redis_url: String::from("redis://example"),
+                redis_max_conn: 5
             }
         );
     }
