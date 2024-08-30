@@ -22,14 +22,17 @@ struct Foo {
   f0: i32,
   #[envman(rename = "f1")]
   f_1: u8,
+  #[envman(default = "default value")]
   f_n: String,
+  f_o: Option<i32>
 }
 
 let foo = Foo::load().unwrap();
 // If rename is not set, it will be an upper case
 let f0 = foo.f0; // This value is taken from “F0”.
 let f_1 = foo.f_1; // This value is taken from “f1”.
-let f_n = foo.f_n; // This value is taken from “F_N”.
+let f_n = foo.f_n; // This value is taken from “F_N” and if it is not set, it will be set to “default value”.
+let f_o = foo.f_o; // This value is taken from “F_O” and if it is not set, it will be set to None.
 ```
 
 ## Usecase
