@@ -47,10 +47,10 @@ async fn main() {
     println!("API_URL: {}", ENVIRONMENTS.api_url);
 }
 
-static ENVIRONMENTS: LazyLock<Foo> = LazyLock::new(|| Foo::load().unwrap());
+pub static ENVIRONMENTS: LazyLock<Environments> = LazyLock::new(|| Environments::load().unwrap());
 
 #[derive(EnvMan)]
-struct Foo {
+pub struct Environments {
     #[envman(default = "https://api.example.com")]
     api_url: String,
 }
