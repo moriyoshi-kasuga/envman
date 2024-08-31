@@ -12,4 +12,4 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-envman = { version = "^0.3", path = "../envman" }
+envman = { version = "^0", path = "../envman" }

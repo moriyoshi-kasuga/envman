@@ -3,6 +3,14 @@ use quote::quote;
 use syn::{Data, DataStruct, DeriveInput, Error, Fields, FieldsNamed};
 
 mod attr;
+mod derive;
+
+pub struct EnvManArgs {
+    name: String,
+    default: Option<String>,
+    test: Option<String>,
+    is_option: bool,
+}
 
 pub fn derive_envman(input: DeriveInput) -> syn::Result<TokenStream> {
     match &input.data {
@@ -26,40 +34,14 @@ pub fn derive_envman_internal(
 
     let field_name = fields.named.iter().map(|f| &f.ident).collect::<Vec<_>>();
 
-    let field_attrs = fields
+    let body = fields
         .named
         .iter()
         .map(attr::attr)
-        .collect::<syn::Result<Vec<_>>>()?;
-
-    let mut body = vec![];
-
-    for (rename, opt, is_opt) in field_attrs {
-        let opt = match opt {
-            Some(text) => quote! { Some(#text) },
-            None => quote! { None::<String> },
-        };
-        let q = if is_opt {
-            quote! { match match std::env::var(#rename) {
-                Ok(v) => Some(v),
-                Err(_) => #opt.map(String::from),
-            } {
-                Some(v) => Some(v.parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() })?),
-                None => None,
-            } }
-        } else {
-            quote! {
-                match std::env::var(#rename) {
-                    Ok(v) => Ok(v),
-                    Err(e) => match #opt {
-                        Some(v) => Ok(String::from(v)),
-                        None => Err(envman::EnvManError::NotFound { key: #rename.to_string() }),
-                    }
-                }?.parse().map_err(|_| envman::EnvManError::Parse { key: #rename.to_string() })?
-            }
-        };
-        body.push(q);
-    }
+        .collect::<syn::Result<Vec<_>>>()?
+        .into_iter()
+        .map(derive::derive)
+        .collect::<Vec<_>>();
 
     let expr = quote! {
         impl #impl_generics envman::EnvMan for #ident #ty_generics #where_clause {

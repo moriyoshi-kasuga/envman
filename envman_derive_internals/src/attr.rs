@@ -1,10 +1,13 @@
 use proc_macro2::Ident;
 use syn::{Field, LitStr, PathSegment, Result, Type};
 
+use crate::EnvManArgs;
+
 /// Find the value of a #[envman(name = "...")] attribute.
-pub fn attr(field: &Field) -> Result<(String, Option<String>, bool)> {
+pub fn attr(field: &Field) -> Result<EnvManArgs> {
     let mut rename = None;
     let mut default = None;
+    let mut test = None;
 
     for attr in &field.attrs {
         if !attr.path().is_ident("envman") {
@@ -28,14 +31,23 @@ pub fn attr(field: &Field) -> Result<(String, Option<String>, bool)> {
                 default = Some(s.value());
                 return Ok(());
             }
+            if meta.path.is_ident("test") {
+                let s: LitStr = meta.value()?.parse()?;
+                if test.is_some() {
+                    return Err(meta.error(String::from("duplicate test attribute")));
+                }
+                test = Some(s.value());
+                return Ok(());
+            }
             Err(meta.error("unsupported attribute"))
         })?;
     }
-    Ok((
-        rename.unwrap_or_else(|| unraw(field.ident.as_ref().unwrap())),
+    Ok(EnvManArgs {
+        name: rename.unwrap_or_else(|| unraw(field.ident.as_ref().unwrap())),
         default,
-        is_option(&field.ty),
-    ))
+        test,
+        is_option: is_option(&field.ty),
+    })
 }
 
 fn is_option(ty: &Type) -> bool {
