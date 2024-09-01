@@ -16,6 +16,7 @@ pub enum EnvManError {
     /// Failed to read environment variable
     NotFound { key: String },
     /// Failed to parse environment variable
+    /// I didn't include a value just in case.
     #[error("failed to parse environment variable of {key}")]
     Parse { key: String },
 }

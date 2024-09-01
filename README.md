@@ -1,4 +1,4 @@
-# envman
+# envman (Environments Manager)
 
 This crate adds a macro for easy management of environment variables.
 
@@ -6,7 +6,7 @@ This crate adds a macro for easy management of environment variables.
 
 ```toml
 [dependencies]
-envman = "0.3.2"
+envman = "0.4.1"
 ```
 
 Version requirement: rustc 1.80+
