@@ -1,4 +1,12 @@
-# envman (Environments Manager)
+# [EnvMan][docsrs]: Environments Manager
+
+[![EnvMan on crates.io][cratesio-image]][cratesio]
+[![EnvMan on docs.rs][docsrs-image]][docsrs]
+
+[cratesio-image]: https://img.shields.io/crates/v/envman.svg
+[cratesio]: https://crates.io/crates/envman
+[docsrs-image]: https://docs.rs/envman/badge.svg
+[docsrs]: https://docs.rs/envman
 
 This crate adds a macro for easy management of environment variables.
 
