@@ -2,14 +2,7 @@
 
 This crate adds a macro for easy management of environment variables.
 
-## Install
-
-```toml
-[dependencies]
-envman = "0.4.1"
-```
-
-Version requirement: rustc 1.80+
+If you would like to see more details, please see [these codes](https://github.com/moriyoshi-kasuga/envman/tree/main/envman/tests).
 
 ## Example
 

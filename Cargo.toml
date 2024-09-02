@@ -1,5 +1,5 @@
 [workspace]
-members = ["envman", "envman_derive", "envman_derive_internals", "tests"]
+members = ["envman", "envman_derive", "envman_derive_internals"]
 resolver = "2"
 
 [workspace.package]
