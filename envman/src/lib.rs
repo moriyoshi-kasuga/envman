@@ -1,6 +1,5 @@
 #![doc = include_str!(concat!("../", std::env!("CARGO_PKG_README")))]
 pub use envman_derive::EnvMan;
-use thiserror::Error;
 
 pub trait EnvMan {
     /// Load environment variables
@@ -9,7 +8,7 @@ pub trait EnvMan {
         Self: std::marker::Sized;
 }
 
-#[derive(Error, Debug)]
+#[derive(thiserror::Error, Debug)]
 /// Error type for [`EnvMan`]
 pub enum EnvManError {
     #[error("failed to read environment variable of {key}")]

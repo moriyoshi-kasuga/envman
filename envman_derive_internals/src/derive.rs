@@ -1,15 +1,18 @@
-use proc_macro2::TokenStream;
-
 use crate::EnvManArgs;
 use quote::quote;
 
-pub fn derive(args: EnvManArgs) -> TokenStream {
-    let opt = match args.default {
+pub fn derive(args: EnvManArgs) -> proc_macro2::TokenStream {
+    let EnvManArgs {
+        name,
+        test,
+        is_option,
+        default,
+    } = args;
+
+    let opt = match default {
         Some(text) => quote! { Some(#text) },
         None => quote! { None::<String> },
     };
-
-    let EnvManArgs { name, test, .. } = args;
 
     let test = match test {
         Some(test) => quote! { Some(#test) },
@@ -23,7 +26,7 @@ pub fn derive(args: EnvManArgs) -> TokenStream {
         }
     };
 
-    if args.is_option {
+    if is_option {
         quote! { match match #variable {
             Ok(v) => Some(v),
             Err(_) => #opt.map(String::from),

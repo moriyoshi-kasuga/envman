@@ -1,10 +1,9 @@
-use proc_macro2::Ident;
-use syn::{Field, LitStr, PathSegment, Result, Type};
+use syn::{LitStr, Type};
 
 use crate::EnvManArgs;
 
 /// Find the value of a #[envman(name = "...")] attribute.
-pub fn attr(field: &Field) -> Result<EnvManArgs> {
+pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
     let mut rename = None;
     let mut default = None;
     let mut test = None;
@@ -57,14 +56,14 @@ fn is_option(ty: &Type) -> bool {
     }
 }
 
-fn get_last_path_segment(ty: &Type) -> Option<&PathSegment> {
+fn get_last_path_segment(ty: &Type) -> Option<&syn::PathSegment> {
     match ty {
         Type::Path(path) => path.path.segments.last(),
         _ => None,
     }
 }
 
-fn unraw(ident: &Ident) -> String {
+fn unraw(ident: &proc_macro2::Ident) -> String {
     ident
         .to_string()
         .trim_start_matches("r#")

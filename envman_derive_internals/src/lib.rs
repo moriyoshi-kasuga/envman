@@ -1,34 +1,30 @@
-use proc_macro2::{Span, TokenStream};
-use quote::quote;
-use syn::{Data, DataStruct, DeriveInput, Error, Fields, FieldsNamed};
-
 mod attr;
 mod derive;
 
-pub struct EnvManArgs {
+struct EnvManArgs {
     name: String,
     default: Option<String>,
     test: Option<String>,
     is_option: bool,
 }
 
-pub fn derive_envman(input: DeriveInput) -> syn::Result<TokenStream> {
+pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     match &input.data {
-        Data::Struct(DataStruct {
-            fields: Fields::Named(fields),
+        syn::Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Named(fields),
             ..
         }) => derive_envman_internal(&input, fields),
-        _ => Err(Error::new(
-            Span::call_site(),
+        _ => Err(syn::Error::new_spanned(
+            input,
             "currently only structs with named fields are supported",
         )),
     }
 }
 
-pub fn derive_envman_internal(
-    input: &DeriveInput,
-    fields: &FieldsNamed,
-) -> syn::Result<TokenStream> {
+fn derive_envman_internal(
+    input: &syn::DeriveInput,
+    fields: &syn::FieldsNamed,
+) -> syn::Result<proc_macro2::TokenStream> {
     let ident = &input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
@@ -43,7 +39,7 @@ pub fn derive_envman_internal(
         .map(derive::derive)
         .collect::<Vec<_>>();
 
-    let expr = quote! {
+    let expr = quote::quote! {
         impl #impl_generics envman::EnvMan for #ident #ty_generics #where_clause {
             fn load() -> Result<Self, envman::EnvManError> {
                 Ok(Self { #( #field_name: #body, )* })

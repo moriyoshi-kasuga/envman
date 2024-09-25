@@ -13,3 +13,6 @@ license = "MIT"
 readme = "README.md"
 categories = ["config"]
 keywords = ["environment", "env", "settings", "config", "management"]
+
+[workspace.dependencies]
+syn = { version = "2.0", default-features = false }
