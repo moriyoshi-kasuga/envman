@@ -1,4 +1,4 @@
-# [EnvMan][docsrs]: Environments Manager
+# [EnvMan][docsrs]: Environments (variables) Manager
 
 [![EnvMan on crates.io][cratesio-image]][cratesio]
 [![EnvMan on docs.rs][docsrs-image]][docsrs]
