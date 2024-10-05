@@ -19,4 +19,4 @@ derive = ["dep:envman_derive"]
 
 [dependencies]
 envman_derive = { version = "^0", path = "../envman_derive", optional = true }
-thiserror = "^1.0"
+thiserror.workspace = true

@@ -16,3 +16,6 @@ keywords = ["environment", "env", "settings", "config", "management"]
 
 [workspace.dependencies]
 syn = { version = "2.0", default-features = false }
+proc-macro2 = "1.0"
+quote = "1.0"
+thiserror = "^1.0"
