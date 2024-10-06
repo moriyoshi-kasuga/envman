@@ -3,10 +3,14 @@ use quote::quote;
 
 pub fn derive(args: EnvManArgs) -> proc_macro2::TokenStream {
     let EnvManArgs {
+        ty,
         name,
-        test,
-        is_option,
+        parser,
         default,
+        test,
+        skip,
+        alltime_parse,
+        is_option,
     } = args;
 
     let opt = match default {

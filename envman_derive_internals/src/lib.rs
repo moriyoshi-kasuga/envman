@@ -1,14 +1,20 @@
+use proc_macro2::TokenStream;
+
 mod attr;
 mod derive;
 
 struct EnvManArgs {
-    name: String,
-    default: Option<String>,
-    test: Option<String>,
-    is_option: bool,
+    pub ty: TokenStream,
+    pub name: String,
+    pub parser: Option<TokenStream>,
+    pub default: Option<TokenStream>,
+    pub test: Option<TokenStream>,
+    pub skip: bool,
+    pub alltime_parse: bool,
+    pub is_option: bool,
 }
 
-pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
+pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<TokenStream> {
     match &input.data {
         syn::Data::Struct(syn::DataStruct {
             fields: syn::Fields::Named(fields),
@@ -24,7 +30,7 @@ pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<proc_macro2::TokenS
 fn derive_envman_internal(
     input: &syn::DeriveInput,
     fields: &syn::FieldsNamed,
-) -> syn::Result<proc_macro2::TokenStream> {
+) -> syn::Result<TokenStream> {
     let ident = &input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
