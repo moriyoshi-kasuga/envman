@@ -10,7 +10,6 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
     let mut parser: Option<TokenStream> = None;
     let mut default: Option<TokenStream> = None;
     let mut test: Option<TokenStream> = None;
-    let mut skip = false;
     let mut alltime_parse = false;
 
     for attr in &field.attrs {
@@ -22,12 +21,6 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
 
         for meta in nested {
             match meta {
-                Meta::Path(ref path) if path.is_ident("skip") => {
-                    if skip {
-                        return Err(syn::Error::new_spanned(meta, "duplicate skip attribute"));
-                    }
-                    skip = true;
-                }
                 Meta::Path(ref path) if path.is_ident("alltime_parse") => {
                     if alltime_parse {
                         return Err(syn::Error::new_spanned(
@@ -66,7 +59,7 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
                         return Err(syn::Error::new_spanned(meta, "duplicate default attribute"));
                     }
                     if let Expr::Path(path) = &meta.value {
-                        default = Some(quote::quote!(#path.path()))
+                        default = Some(quote::quote!(#path()))
                     }
                 }
                 Meta::Path(ref path) if path.is_ident("test") => {
@@ -86,7 +79,7 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
                         return Err(syn::Error::new_spanned(meta, "duplicate test attribute"));
                     }
                     if let Expr::Path(path) = &meta.value {
-                        test = Some(quote::quote!(#path.path()))
+                        test = Some(quote::quote!(#path()))
                     }
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("parser") => {
@@ -107,9 +100,7 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
         test,
         is_option: is_option(&field.ty),
         parser,
-        skip,
         alltime_parse,
-        ty: field.ty.to_token_stream(),
     })
 }
 

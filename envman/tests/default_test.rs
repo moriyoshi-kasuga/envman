@@ -3,9 +3,9 @@ use envman::EnvMan;
 #[derive(EnvMan, Debug, PartialEq)]
 struct TestDefault {
     /// If the variable could not be taken, this is the value
-    #[envman(default = "redis://example")]
+    #[envman(default = "redis://example".to_string())]
     redis_url: String,
-    #[envman(default = "5")]
+    #[envman(default = "5", alltime_parse)]
     redis_max_conn: u8,
 }
 

@@ -28,10 +28,10 @@ struct Foo {
   f0: i32,
   #[envman(rename = "f1")]
   f_1: u8,
-  #[envman(default = "default value")]
+  #[envman(default = "default value".to_string())]
   f_n: String,
   f_o: Option<i32>,
-  #[envman(default = "1", test = "2")]
+  #[envman(default = 1, test = 2)]
   f_test: u8,
 }
 
@@ -53,7 +53,7 @@ let f_test = foo.f_test;
 ## Usecase
 
 ```rust
-use std::sync::LazyLock;
+use std::{net::SocketAddr, sync::LazyLock};
 
 use envman::EnvMan;
 
@@ -61,7 +61,7 @@ fn main() {
     // this unsafe block is necessary for test
     // and it is not necessary in production
     unsafe {
-      std::env::set_var("JWT_SECRET", "secret");
+        std::env::set_var("JWT_SECRET", "secret");
     }
 
     // initialize
@@ -74,10 +74,10 @@ pub static ENVIRONMENTS: LazyLock<Environments> = LazyLock::new(|| Environments:
 
 #[derive(EnvMan)]
 pub struct Environments {
-    #[envman(default = "https://api.example.com")]
-    api_url: String,
-    #[envman(test = "secret")]
-    jwt_secret: String,
+    #[envman(default = "127.0.0.1:8080", alltime_parse)]
+    pub api_url: SocketAddr,
+    #[envman(test = "secret".to_string())]
+    pub jwt_secret: String,
 }
 ```
 

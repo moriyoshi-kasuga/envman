@@ -14,7 +14,8 @@ keywords.workspace = true
 proc-macro = true
 
 [dependencies]
-envman_derive_internals = { version = "^0", path = "../envman_derive_internals" }
+envman_derive_internals = { version = "^1", path = "../envman_derive_internals" }
+
 syn = { workspace = true, default-features = false, features = [
     "parsing",
     "proc-macro",

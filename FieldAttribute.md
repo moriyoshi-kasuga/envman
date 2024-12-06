@@ -21,12 +21,7 @@ All of the following are inside `#[envman()]`.
    - `default = "default value"`
    - `default_f = "constants::get_default_value"`
 
-5. skip : `skip`
-
-   > not get from env, use default value  
-   > required group_default
-
-6. alltime_parse : `alltime_parse`
+5. alltime_parse : `alltime_parse`
    > The normal default (and test) return value is the field type  
    > If this is set, the return value is a string and the parser is used.
    > optional
@@ -52,7 +47,6 @@ struct FieldAttrs {
     // pub default_f: Option<Path>,
     // All of the above apply.
     pub default: Option<TokenStream>,
-    pub skip: bool,
     pub alltime_parse: bool,
     /// todo
     // pub is_option: bool,

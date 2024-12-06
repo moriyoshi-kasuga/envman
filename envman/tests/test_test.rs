@@ -3,10 +3,10 @@ use envman::EnvMan;
 #[derive(EnvMan, Debug, PartialEq)]
 struct TestTestValue {
     /// Apply value only at test time
-    #[envman(test = "2")]
+    #[envman(test = "2".to_string())]
     secret_1: String,
     /// Test values take precedence over default values
-    #[envman(default = "1", test = "3")]
+    #[envman(default = "1".to_string(), test = "3".to_string())]
     secret_2: String,
 }
 

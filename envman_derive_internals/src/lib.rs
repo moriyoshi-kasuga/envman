@@ -4,12 +4,10 @@ mod attr;
 mod derive;
 
 struct EnvManArgs {
-    pub ty: TokenStream,
     pub name: String,
     pub parser: Option<TokenStream>,
     pub default: Option<TokenStream>,
     pub test: Option<TokenStream>,
-    pub skip: bool,
     pub alltime_parse: bool,
     pub is_option: bool,
 }
