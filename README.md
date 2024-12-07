@@ -81,6 +81,24 @@ pub struct Environments {
 }
 ```
 
+## Field Attributes
+
+- rename : `rename = "new name"` (default: upper case)
+- parser: `parser = constants::default_parser` (default: FromStr::from_str)
+  > parser type is `fn(&str) -> Result<T, E>` and `E` has impl `std::error::Error`
+- group_test: (default: None)
+  > if under test, use this value (Priority is first)
+  - test: `test` Use Default::default()
+  - test: `test = Default::default()` (put anything of expr)
+- group_default: (default: None)
+  > if not found in env, use this value
+  > if a test exists and is under test, use the test
+  - default: `default`
+  - default: `default = Default::default()` (put anything of expr)
+- alltime_parse: `alltime_parse` (default: false)
+  > The normal default (and test) return value is the field type
+  > if this is set, the return value is a string and the parser is used
+
 ## License
 
 Licensed under

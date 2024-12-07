@@ -3,7 +3,7 @@ members = ["envman", "envman_derive", "envman_derive_internals"]
 resolver = "2"
 
 [workspace.package]
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 rust-version = "1.80"
 description = "This crate adds a macro for easy management of environment variables."

@@ -54,14 +54,6 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
                     }
                     default = Some(meta.value.into_token_stream())
                 }
-                Meta::NameValue(meta) if meta.path.is_ident("default_f") => {
-                    if default.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate default attribute"));
-                    }
-                    if let Expr::Path(path) = &meta.value {
-                        default = Some(quote::quote!(#path()))
-                    }
-                }
                 Meta::Path(ref path) if path.is_ident("test") => {
                     if test.is_some() {
                         return Err(syn::Error::new_spanned(meta, "duplicate test attribute"));
@@ -73,14 +65,6 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
                         return Err(syn::Error::new_spanned(meta, "duplicate test attribute"));
                     }
                     test = Some(meta.value.into_token_stream())
-                }
-                Meta::NameValue(meta) if meta.path.is_ident("test_f") => {
-                    if test.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate test attribute"));
-                    }
-                    if let Expr::Path(path) = &meta.value {
-                        test = Some(quote::quote!(#path()))
-                    }
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("parser") => {
                     if parser.is_some() {
