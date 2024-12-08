@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "envman"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "envman_derive",
  "thiserror",
@@ -12,7 +12,7 @@ dependencies = [
 
 [[package]]
 name = "envman_derive"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "envman_derive_internals",
  "syn",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "envman_derive_internals"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "proc-macro2",
  "quote",

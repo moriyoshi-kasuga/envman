@@ -12,6 +12,7 @@ categories.workspace = true
 keywords.workspace = true
 
 [lib]
+name = "envman"
 
 [features]
 default = ["derive"]
@@ -22,6 +23,9 @@ envman_derive = { version = "^1", path = "../envman_derive", optional = true }
 
 thiserror.workspace = true
 
+
+[lints]
+workspace = true
 
 [[example]]
 name = "webapi"

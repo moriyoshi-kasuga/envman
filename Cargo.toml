@@ -3,7 +3,7 @@ members = ["envman", "envman_derive", "envman_derive_internals"]
 resolver = "2"
 
 [workspace.package]
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 rust-version = "1.80"
 description = "This crate adds a macro for easy management of environment variables."
@@ -19,3 +19,16 @@ syn = { version = "2.0", default-features = false }
 proc-macro2 = "1.0"
 quote = "1.0"
 thiserror = "2.0"
+
+[workspace.lints.rust]
+nonstandard_style = { level = "warn", priority = -1 }
+unreachable_pub = "warn"
+unused_import_braces = "warn"
+unused_lifetimes = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+print_stdout = "deny"
+print_stderr = "deny"

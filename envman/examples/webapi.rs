@@ -1,3 +1,5 @@
+#![allow(clippy::print_stdout, clippy::unwrap_used)]
+
 use std::{net::SocketAddr, sync::LazyLock};
 
 use envman::EnvMan;

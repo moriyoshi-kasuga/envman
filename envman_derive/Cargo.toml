@@ -20,3 +20,6 @@ syn = { workspace = true, default-features = false, features = [
     "parsing",
     "proc-macro",
 ] }
+
+[lints]
+workspace = true

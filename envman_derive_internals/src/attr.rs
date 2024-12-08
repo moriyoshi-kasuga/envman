@@ -5,7 +5,7 @@ use syn::{punctuated::Punctuated, Expr, Lit, Meta, Token, Type};
 use crate::EnvManArgs;
 
 /// Find the value of a #[envman(name = "...")] attribute.
-pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
+pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
     let mut rename: Option<String> = None;
     let mut parser: Option<TokenStream> = None;
     let mut default: Option<TokenStream> = None;
@@ -79,7 +79,12 @@ pub fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
         }
     }
     Ok(EnvManArgs {
-        name: rename.unwrap_or_else(|| unraw(field.ident.as_ref().unwrap())),
+        name: rename.unwrap_or(unraw(
+            field
+                .ident
+                .as_ref()
+                .ok_or_else(|| syn::Error::new_spanned(field, "field must have a name"))?,
+        )),
         default,
         test,
         is_option: is_option(&field.ty),
