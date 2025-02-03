@@ -21,5 +21,9 @@ syn = { workspace = true, default-features = false, features = [
     "proc-macro",
 ] }
 
+[dev-dependencies]
+envman = { version = "^1", path = "../envman" }
+envman_derive = { version = "^1", path = "../envman_derive" }
+
 [lints]
 workspace = true
