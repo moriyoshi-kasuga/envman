@@ -3,7 +3,15 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{punctuated::Punctuated, spanned::Spanned, Expr, Lit, Meta, Token, Type};
 
-use crate::EnvManFieldArgs;
+pub(crate) struct EnvManFieldArgs {
+    pub name: String,
+    pub parser: Option<TokenStream>,
+    pub default: Option<TokenStream>,
+    pub test: Option<TokenStream>,
+    pub alltime_parse: bool,
+    pub is_option: bool,
+    pub nest: bool,
+}
 
 /// Find the value of a #[envman(name = "...")] attribute.
 pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {

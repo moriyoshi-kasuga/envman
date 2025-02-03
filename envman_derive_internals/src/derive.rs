@@ -1,5 +1,6 @@
-use crate::EnvManFieldArgs;
 use quote::quote;
+
+use crate::attr::EnvManFieldArgs;
 
 pub(crate) fn derive(args: EnvManFieldArgs) -> proc_macro2::TokenStream {
     let EnvManFieldArgs {

@@ -3,15 +3,6 @@ use proc_macro2::TokenStream;
 mod attr;
 mod derive;
 
-struct EnvManFieldArgs {
-    pub name: String,
-    pub parser: Option<TokenStream>,
-    pub default: Option<TokenStream>,
-    pub test: Option<TokenStream>,
-    pub alltime_parse: bool,
-    pub is_option: bool,
-}
-
 pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<TokenStream> {
     match &input.data {
         syn::Data::Struct(syn::DataStruct {
