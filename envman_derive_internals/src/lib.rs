@@ -3,7 +3,7 @@ use proc_macro2::TokenStream;
 mod attr;
 mod derive;
 
-struct EnvManArgs {
+struct EnvManFieldArgs {
     pub name: String,
     pub parser: Option<TokenStream>,
     pub default: Option<TokenStream>,

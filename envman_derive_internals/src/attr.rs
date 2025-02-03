@@ -3,10 +3,10 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{punctuated::Punctuated, spanned::Spanned, Expr, Lit, Meta, Token, Type};
 
-use crate::EnvManArgs;
+use crate::EnvManFieldArgs;
 
 /// Find the value of a #[envman(name = "...")] attribute.
-pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
+pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
     let mut rename: Option<String> = None;
     let mut parser: Option<TokenStream> = None;
     let mut default: Option<TokenStream> = None;
@@ -71,7 +71,7 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
             }
         }
     }
-    Ok(EnvManArgs {
+    Ok(EnvManFieldArgs {
         name: rename.unwrap_or(unraw(
             field
                 .ident
