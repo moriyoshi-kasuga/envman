@@ -14,7 +14,7 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> proc_macro2::TokenStream {
 
     let parser = match parser {
         Some(parser) => quote! { #parser },
-        None => quote! { core::str::FromStr::from_str },
+        None => quote! { std::str::FromStr::from_str },
     };
 
     macro_rules! parse {
