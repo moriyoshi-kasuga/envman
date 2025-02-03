@@ -20,6 +20,7 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
     let mut default: Option<TokenStream> = None;
     let mut test: Option<TokenStream> = None;
     let mut alltime_parse = false;
+    let mut nest = false;
 
     for attr in &field.attrs {
         if !attr.path().is_ident("envman") {
@@ -75,6 +76,10 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
 
                     return Err(syn::Error::new_spanned(meta, "expected path"));
                 }
+                Meta::Path(ref path) if path.is_ident("nest") => {
+                    check_duplicate!(path.span(), nest, nest);
+                    nest = true;
+                }
                 _ => return Err(syn::Error::new_spanned(meta, "unexpected attribute")),
             }
         }
@@ -91,6 +96,7 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
         is_option: is_option(&field.ty),
         parser,
         alltime_parse,
+        nest,
     })
 }
 

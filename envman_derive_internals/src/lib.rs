@@ -32,7 +32,7 @@ fn derive_envman_internal(
         .collect::<syn::Result<Vec<_>>>()?
         .into_iter()
         .map(derive::derive)
-        .collect::<Vec<_>>();
+        .collect::<syn::Result<Vec<_>>>()?;
 
     let expr = quote::quote! {
         impl #impl_generics envman::EnvMan for #ident #ty_generics #where_clause {

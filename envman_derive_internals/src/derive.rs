@@ -2,7 +2,7 @@ use quote::quote;
 
 use crate::attr::EnvManFieldArgs;
 
-pub(crate) fn derive(args: EnvManFieldArgs) -> proc_macro2::TokenStream {
+pub(crate) fn derive(args: EnvManFieldArgs) -> syn::Result<proc_macro2::TokenStream> {
     let EnvManFieldArgs {
         name,
         parser,
@@ -10,7 +10,58 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> proc_macro2::TokenStream {
         test,
         alltime_parse,
         is_option,
+        nest,
     } = args;
+
+    if nest {
+        if parser.is_some() {
+            return Err(syn::Error::new_spanned(
+                parser,
+                "`parser` is not allowed when `nest` is true",
+            ));
+        }
+        if alltime_parse {
+            return Err(syn::Error::new_spanned(
+                alltime_parse,
+                "`alltime_parse` is not allowed when `nest` is true",
+            ));
+        }
+
+        let load = quote! {
+            envman::EnvMan::load()
+        };
+
+        let token = if is_option {
+            if default.is_some() {
+                quote! {
+                    #load.ok().or_else(|| Some(#default))
+                }
+            } else {
+                quote! {
+                    #load.ok()
+                }
+            }
+        } else if default.is_some() {
+            quote! {
+                #load.unwrap_or_else(|_| #default)
+            }
+        } else {
+            quote! {
+                #load?
+            }
+        };
+
+        return match test {
+            Some(test) => Ok(quote! {
+                if cfg!(test) {
+                    #test
+                } else {
+                    #token
+                }
+            }),
+            None => Ok(token),
+        };
+    }
 
     let parser = match parser {
         Some(parser) => quote! { #parser },
@@ -76,14 +127,14 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> proc_macro2::TokenStream {
         Some(test) => {
             let token_parse = alltime_parse!(test);
             let test = wrap_opt!(token_parse);
-            quote! {
+            Ok(quote! {
                 if cfg!(test) {
                     #test
                 } else {
                     #token
                 }
-            }
+            })
         }
-        None => token,
+        None => Ok(token),
     }
 }
