@@ -1,6 +1,7 @@
+use crate::check_duplicate;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use syn::{punctuated::Punctuated, Expr, Lit, Meta, Token, Type};
+use syn::{punctuated::Punctuated, spanned::Spanned, Expr, Lit, Meta, Token, Type};
 
 use crate::EnvManArgs;
 
@@ -22,18 +23,12 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
         for meta in nested {
             match meta {
                 Meta::Path(ref path) if path.is_ident("alltime_parse") => {
-                    if alltime_parse {
-                        return Err(syn::Error::new_spanned(
-                            meta,
-                            "duplicate alltime_parse attribute",
-                        ));
-                    }
+                    check_duplicate!(path.span(), alltime_parse, alltime_parse);
                     alltime_parse = true;
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("rename") => {
-                    if rename.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate rename attribute"));
-                    }
+                    check_duplicate!(meta.span(), rename);
+
                     if let Expr::Lit(expr) = &meta.value {
                         if let Lit::Str(lit_str) = &expr.lit {
                             rename = Some(lit_str.value());
@@ -43,36 +38,34 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManArgs> {
                     return Err(syn::Error::new_spanned(meta, "expected string literal"));
                 }
                 Meta::Path(ref path) if path.is_ident("default") => {
-                    if default.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate default attribute"));
-                    }
+                    check_duplicate!(meta.span(), default);
+
                     default = Some(quote::quote!("Default::default()"))
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("default") => {
-                    if default.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate default attribute"));
-                    }
+                    check_duplicate!(meta.span(), default);
+
                     default = Some(meta.value.into_token_stream())
                 }
                 Meta::Path(ref path) if path.is_ident("test") => {
-                    if test.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate test attribute"));
-                    }
+                    check_duplicate!(meta.span(), test);
+
                     test = Some(quote::quote!("Default::default()"))
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("test") => {
-                    if test.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate test attribute"));
-                    }
+                    check_duplicate!(meta.span(), test);
+
                     test = Some(meta.value.into_token_stream())
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("parser") => {
-                    if parser.is_some() {
-                        return Err(syn::Error::new_spanned(meta, "duplicate parser attribute"));
-                    }
+                    check_duplicate!(meta.span(), parser);
+
                     if let Expr::Path(path) = &meta.value {
-                        parser = Some(path.to_token_stream())
+                        parser = Some(path.to_token_stream());
+                        continue;
                     }
+
+                    return Err(syn::Error::new_spanned(meta, "expected path"));
                 }
                 _ => return Err(syn::Error::new_spanned(meta, "unexpected attribute")),
             }

@@ -52,3 +52,25 @@ fn derive_envman_internal(
     };
     Ok(expr)
 }
+
+macro_rules! check_duplicate {
+            ($span:expr, $variant:ident) => {
+                check_duplicate!(@__message $span, $variant, $variant.is_some(),);
+            };
+            ($span:expr, $variant:ident, $additional:literal) => {
+                check_duplicate!(@__message $span, $variant, $variant.is_some(), $additional);
+            };
+            ($span:expr, $variant:ident, $expr:expr) => {
+                check_duplicate!(@__message $span, $variant, $expr,);
+            };
+            (@__message $span:expr, $variant:ident, $expr:expr, $($additional:expr)?) => {
+                check_duplicate!(@__final $span, $expr, concat!("duplicate `", stringify!($variant), "` attribute.", $(" ", $additional)?));
+            };
+            (@__final $span:expr, $expr:expr, $message:expr) => {
+                if $expr {
+                    return Err(syn::Error::new($span, $message));
+                }
+            };
+        }
+
+pub(crate) use check_duplicate;
