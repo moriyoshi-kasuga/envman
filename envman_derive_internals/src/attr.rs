@@ -48,7 +48,7 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
                 Meta::Path(ref path) if path.is_ident("default") => {
                     check_duplicate!(meta.span(), default);
 
-                    default = Some(quote::quote!("Default::default()"))
+                    default = Some(quote::quote!(Default::default()))
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("default") => {
                     check_duplicate!(meta.span(), default);
@@ -58,7 +58,7 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
                 Meta::Path(ref path) if path.is_ident("test") => {
                     check_duplicate!(meta.span(), test);
 
-                    test = Some(quote::quote!("Default::default()"))
+                    test = Some(quote::quote!(Default::default()))
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("test") => {
                     check_duplicate!(meta.span(), test);
