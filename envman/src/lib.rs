@@ -8,11 +8,11 @@ pub trait EnvMan {
         Self: std::marker::Sized;
 }
 
-#[derive(thiserror::Error, Debug)]
 /// Error type for [`EnvMan`]
+#[derive(thiserror::Error, Debug)]
 pub enum EnvManError {
-    #[error("failed to read environment variable of {key}")]
     /// Failed to read environment variable
+    #[error("failed to read environment variable of {key}")]
     NotFound { key: &'static str },
     /// Failed to parse environment variable
     /// I didn't include a value just in case.
