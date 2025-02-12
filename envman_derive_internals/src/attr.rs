@@ -1,7 +1,7 @@
-use crate::check_duplicate;
+use crate::{check_duplicate, require_lit_str, EnvManStructArgs};
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use syn::{punctuated::Punctuated, spanned::Spanned, Expr, Lit, Meta, Token, Type};
+use syn::{punctuated::Punctuated, spanned::Spanned, Expr, Meta, Token, Type};
 
 pub(crate) struct EnvManFieldArgs {
     pub name: String,
@@ -14,7 +14,10 @@ pub(crate) struct EnvManFieldArgs {
 }
 
 /// Find the value of a #[envman(name = "...")] attribute.
-pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
+pub(crate) fn attr(
+    field: &syn::Field,
+    struct_arg: &EnvManStructArgs,
+) -> syn::Result<EnvManFieldArgs> {
     let mut rename: Option<String> = None;
     let mut parser: Option<TokenStream> = None;
     let mut default: Option<TokenStream> = None;
@@ -38,13 +41,9 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
                 Meta::NameValue(meta) if meta.path.is_ident("rename") => {
                     check_duplicate!(meta.span(), rename);
 
-                    if let Expr::Lit(expr) = &meta.value {
-                        if let Lit::Str(lit_str) = &expr.lit {
-                            rename = Some(lit_str.value());
-                            continue;
-                        }
-                    }
-                    return Err(syn::Error::new_spanned(meta, "expected string literal"));
+                    let string = require_lit_str(&meta, &meta.value)?;
+
+                    rename = Some(string);
                 }
                 Meta::Path(ref path) if path.is_ident("default") => {
                     check_duplicate!(meta.span(), default);
@@ -84,13 +83,26 @@ pub(crate) fn attr(field: &syn::Field) -> syn::Result<EnvManFieldArgs> {
             }
         }
     }
+    let name = match rename {
+        Some(x) => x,
+        None => {
+            let mut name = unraw(
+                field
+                    .ident
+                    .as_ref()
+                    .ok_or_else(|| syn::Error::new_spanned(field, "field must have a name"))?,
+            );
+            if let Some(prefix) = &struct_arg.prefix {
+                name = format!("{prefix}{name}");
+            };
+            if let Some(suffix) = &struct_arg.suffix {
+                name = format!("{name}{suffix}");
+            };
+            struct_arg.rename_all.apply_to_field(name)
+        }
+    };
     Ok(EnvManFieldArgs {
-        name: rename.unwrap_or(unraw(
-            field
-                .ident
-                .as_ref()
-                .ok_or_else(|| syn::Error::new_spanned(field, "field must have a name"))?,
-        )),
+        name,
         default,
         test,
         is_option: is_option(&field.ty),
@@ -115,9 +127,5 @@ fn get_last_path_segment(ty: &Type) -> Option<&syn::PathSegment> {
 }
 
 fn unraw(ident: &proc_macro2::Ident) -> String {
-    ident
-        .to_string()
-        .trim_start_matches("r#")
-        .to_owned()
-        .to_uppercase()
+    ident.to_string().trim_start_matches("r#").to_owned()
 }

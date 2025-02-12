@@ -1,7 +1,15 @@
+use ident_case::RenameRule;
 use proc_macro2::TokenStream;
 
 mod attr;
 mod derive;
+mod struct_attr;
+
+struct EnvManStructArgs {
+    pub rename_all: RenameRule,
+    pub prefix: Option<String>,
+    pub suffix: Option<String>,
+}
 
 pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<TokenStream> {
     match &input.data {
@@ -23,12 +31,14 @@ fn derive_envman_internal(
     let ident = &input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
+    let attr_arg = struct_attr::struct_attr(input)?;
+
     let field_name = fields.named.iter().map(|f| &f.ident).collect::<Vec<_>>();
 
     let body = fields
         .named
         .iter()
-        .map(attr::attr)
+        .map(|v| attr::attr(v, &attr_arg))
         .collect::<syn::Result<Vec<_>>>()?
         .into_iter()
         .map(derive::derive)
@@ -45,23 +55,34 @@ fn derive_envman_internal(
 }
 
 macro_rules! check_duplicate {
-            ($span:expr, $variant:ident) => {
-                check_duplicate!(@__message $span, $variant, $variant.is_some(),);
-            };
-            ($span:expr, $variant:ident, $additional:literal) => {
-                check_duplicate!(@__message $span, $variant, $variant.is_some(), $additional);
-            };
-            ($span:expr, $variant:ident, $expr:expr) => {
-                check_duplicate!(@__message $span, $variant, $expr,);
-            };
-            (@__message $span:expr, $variant:ident, $expr:expr, $($additional:expr)?) => {
-                check_duplicate!(@__final $span, $expr, concat!("duplicate `", stringify!($variant), "` attribute.", $(" ", $additional)?));
-            };
-            (@__final $span:expr, $expr:expr, $message:expr) => {
-                if $expr {
-                    return Err(syn::Error::new($span, $message));
-                }
-            };
+    ($span:expr, $variant:ident) => {
+        check_duplicate!(@__message $span, $variant, $variant.is_some(),);
+    };
+    ($span:expr, $variant:ident, $additional:literal) => {
+        check_duplicate!(@__message $span, $variant, $variant.is_some(), $additional);
+    };
+    ($span:expr, $variant:ident, $expr:expr) => {
+        check_duplicate!(@__message $span, $variant, $expr,);
+    };
+    (@__message $span:expr, $variant:ident, $expr:expr, $($additional:expr)?) => {
+        check_duplicate!(@__final $span, $expr, concat!("duplicate `", stringify!($variant), "` attribute.", $(" ", $additional)?));
+    };
+    (@__final $span:expr, $expr:expr, $message:expr) => {
+        if $expr {
+            return Err(syn::Error::new($span, $message));
         }
+    };
+}
 
 pub(crate) use check_duplicate;
+use syn::spanned::Spanned;
+
+fn require_lit_str<S: Spanned>(span: &S, expr: &syn::Expr) -> syn::Result<String> {
+    if let syn::Expr::Lit(expr_lit) = &expr {
+        if let syn::Lit::Str(lit_str) = &expr_lit.lit {
+            return Ok(lit_str.value());
+        }
+    }
+
+    Err(syn::Error::new(span.span(), "expected string literal"))
+}
