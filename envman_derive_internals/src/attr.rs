@@ -92,13 +92,14 @@ pub(crate) fn attr(
                     .as_ref()
                     .ok_or_else(|| syn::Error::new_spanned(field, "field must have a name"))?,
             );
+            name = struct_arg.rename_all.apply_to_field(name);
             if let Some(prefix) = &struct_arg.prefix {
                 name = format!("{prefix}{name}");
             };
             if let Some(suffix) = &struct_arg.suffix {
                 name = format!("{name}{suffix}");
             };
-            struct_arg.rename_all.apply_to_field(name)
+            name
         }
     };
     Ok(EnvManFieldArgs {
