@@ -3,8 +3,24 @@ use syn::{parse_macro_input, DeriveInput};
 /**
 Automatically implements [`envman::EnvMan`]
 
+
+# Note
+- if the field is Option, the default value is None
+- if the field has rename attribute, the field name is not affected by suffix, prefix and rename_all
+
 # Struct Attributes:
- ( Currently no attributes are supported )
+
+### rename_all: `rename_all = "rule"` (default: SCREAMING-KEBAB-CASE)
+applies to all fields
+
+The possible values are ("lowercase", "UPPERCASE", "PascalCase", "camelCase",
+"snake_case", "SCREAMING_SNAKE_CASE", "kebab-case", "SCREAMING-KEBAB-CASE")
+
+### prefix: `prefix = "prefix"` (default: None)
+prefix to all fields
+
+### suffix: `suffix = "suffix"` (default: None)
+suffix to all fields
 
 # Field Attributes:
 
@@ -48,14 +64,29 @@ struct Foo {
   #[envman(default = 1, test = 2)]
   f_test: u8,
   #[envman(nest, default)]
-  inner: Option<Inner>,
+  db: Option<DbData>,
 }
 
 #[derive(EnvMan, Default)]
-struct Inner {
-  inner_1: String,
+#[envman(prefix = "DB_")]
+struct DbData {
+  url: String,
 }
 
+unsafe {
+    std::env::set_var("F0", "1");
+    std::env::set_var("f1", "2");
+    std::env::set_var("DB_URL", "url");
+}
+
+let foo = Foo::load().unwrap();
+assert_eq!(foo.f0, 1);
+assert_eq!(foo.f_1, 2);
+assert_eq!(foo.f_n, "default value");
+assert_eq!(foo.f_o, None);
+// in doctest, cfg is doctest, not test
+assert_eq!(foo.f_test, 1);
+assert_eq!(foo.db.unwrap().url, "url");
 */
 #[proc_macro_derive(EnvMan, attributes(envman))]
 pub fn derive_envman(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
