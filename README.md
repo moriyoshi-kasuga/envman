@@ -8,96 +8,76 @@
 [docsrs-image]: https://docs.rs/envman/badge.svg
 [docsrs]: https://docs.rs/envman
 
-This crate adds a macro for easy management of environment variables.
+EnvMan is a Rust crate that provides a procedural macro to simplify the management of environment variables. It allows you to automatically load and parse environment variables into your Rust structs, with support for default values, custom parsers, and more.
 
-If you would like to see more details, please see [these codes](https://github.com/moriyoshi-kasuga/envman/tree/main/envman/tests).
+## Features
 
-## Example
+- **Automatic Environment Variable Loading**: Automatically load environment variables into struct fields.
+- **Customizable Field Attributes**: Use attributes to customize field names, parsers, default values, and more.
+- **Support for Nested Structs**: Easily manage nested configurations with support for nested structs.
+- **Flexible Naming Conventions**: Use `rename_all`, `prefix`, and `suffix` to control environment variable naming.
+
+## Usage
+
+Here's a basic example demonstrating how to use EnvMan to manage environment variables:
 
 ```rust
 use envman::EnvMan;
+use std::net::IpAddr;
 
-unsafe {
-  std::env::set_var("F0", "-1");
-  std::env::set_var("f1", "1");
-}
-
-// The type of field can be set if FromStr is implemented
 #[derive(EnvMan)]
-struct Foo {
-  f0: i32,
-  #[envman(rename = "f1")]
-  f_1: u8,
-  #[envman(default = "default value".to_string())]
-  f_n: String,
-  f_o: Option<i32>,
-  #[envman(default = 1, test = 2)]
-  f_test: u8,
+struct Config {
+    #[envman(rename = "APP_PORT", test = 8080)]
+    port: u16,
+    #[envman(nest)]
+    database: DatabaseConfig,
 }
 
-// If rename is not set, it will be an upper case
-let foo = Foo::load().unwrap();
-// This value is taken from “F0”.
-let f0 = foo.f0;
-// This value is taken from “f1”.
-let f_1 = foo.f_1;
-// This value is taken from “F_N” and if it is not set, it will be set to “default value”.
-let f_n = foo.f_n;
-// This value is taken from “F_O” and if it is not set, it will be set to None.
-let f_o = foo.f_o;
-// This value is taken from “F_TEST” and if it is not set, it will be set to 1.
-// and if it under test, it will be set to 2.
-let f_test = foo.f_test;
-```
-
-## Usecase
-
-```rust
-use std::{net::SocketAddr, sync::LazyLock};
-
-use envman::EnvMan;
+#[derive(EnvMan)]
+#[envman(prefix = "DB_",)]
+struct DatabaseConfig {
+    #[envman(default = "127.0.0.1", alltime_parse)]
+    host: IpAddr,
+    #[envman(default = 5432)]
+    port: u16,
+}
 
 fn main() {
-    // this unsafe block is necessary for test
-    // and it is not necessary in production
     unsafe {
-        std::env::set_var("JWT_SECRET", "secret");
+        std::env::set_var("APP_PORT", "5000");
+        std::env::set_var("DB_HOST", "192.168.1.1");
+        std::env::set_var("DB_PORT", "5432");
     }
+    
+    // Load the configuration from environment variables
+    let config = Config::load().expect("Failed to load configuration");
 
-    // initialize
-    let _ = &*ENVIRONMENTS;
-
-    println!("API_URL: {}", ENVIRONMENTS.api_url);
-}
-
-pub static ENVIRONMENTS: LazyLock<Environments> = LazyLock::new(|| Environments::load().unwrap());
-
-#[derive(EnvMan)]
-pub struct Environments {
-    #[envman(default = "127.0.0.1:8080", alltime_parse)]
-    pub api_url: SocketAddr,
-    #[envman(test = "secret".to_string())]
-    pub jwt_secret: String,
+    // Assertions to verify the configuration
+    assert_eq!(config.port, 5000);
+    assert_eq!(config.database.host.to_string(), "192.168.1.1");
+    assert_eq!(config.database.port, 5432);
 }
 ```
 
-## Field Attributes
+## Attributes
 
-- rename : `rename = "new name"` (default: upper case)
-- parser: `parser = constants::default_parser` (default: FromStr::from_str)
-  > parser type is `fn(&str) -> Result<T, E>` and `E` has impl `std::error::Error`
-- group_test: (default: None)
-  > if under test, use this value (Priority is first)
-  - test: `test` Use Default::default()
-  - test: `test = Default::default()` (put anything of expr)
-- group_default: (default: None)
-  > if not found in env, use this value
-  > if a test exists and is under test, use the test
-  - default: `default`
-  - default: `default = Default::default()` (put anything of expr)
-- alltime_parse: `alltime_parse` (default: false)
-  > The normal default (and test) return value is the field type
-  > if this is set, the return value is a string and the parser is used
+### Struct Attributes
+
+- **`rename_all`**: Apply a naming convention to all fields (default: `SCREAMING_SNAKE_CASE`).
+- **`prefix`**: Add a prefix to all field names.
+- **`suffix`**: Add a suffix to all field names.
+
+### Field Attributes
+
+- **`rename`**: Specify a custom environment variable name for a field.
+- **`default`**: Provide a default value if the environment variable is not set.
+- **`parser`**: Use a custom parser function to parse the environment variable. (default: `FromStr::from_str`)
+- **`nest`**: Indicate that the field is a nested struct implementing `EnvMan`.
+- **`alltime_parse`**: Always use the specified parser to parse the environment variable, even if a default value is provided.
+
+## More Info
+
+more info: [doc.rs](https://docs.rs/envman/latest/envman/derive.EnvMan.html)
 
 ## License
 
