@@ -54,16 +54,16 @@ use syn::{parse_macro_input, DeriveInput};
 ///
 /// #[derive(EnvMan)]
 /// struct Foo {
-///   f0: i32,
-///   #[envman(rename = "f1")]
-///   f_1: u8,
+///   normal: i32,
+///   #[envman(rename = "renamed")]
+///   so_long_name: u8,
 ///   #[envman(default = "default value".to_string())]
-///   f_n: String,
-///   f_o: Option<i32>,
+///   default: String,
+///   wrapped: Option<i32>,
 ///   #[envman(default = 1, test = 2)]
-///   f_test: u8,
-///   #[envman(nest, default)]
-///   db: Option<DbData>,
+///   test_value: u8,
+///   #[envman(nest)]
+///   nested: DbData,
 /// }
 ///
 /// #[derive(EnvMan, Default)]
@@ -73,19 +73,20 @@ use syn::{parse_macro_input, DeriveInput};
 /// }
 ///
 /// unsafe {
-///     std::env::set_var("F0", "1");
-///     std::env::set_var("f1", "2");
+///     std::env::set_var("NORMAL", "1");
+///     // rename attribute is not affected by rename_all, prefix, and suffix
+///     std::env::set_var("renamed", "2");
 ///     std::env::set_var("DB_URL", "url");
 /// }
 ///
 /// let foo = Foo::load().unwrap();
-/// assert_eq!(foo.f0, 1);
-/// assert_eq!(foo.f_1, 2);
-/// assert_eq!(foo.f_n, "default value");
-/// assert_eq!(foo.f_o, None);
+/// assert_eq!(foo.normal, 1);
+/// assert_eq!(foo.so_long_name, 2);
+/// assert_eq!(foo.default, "default value");
+/// assert_eq!(foo.wrapped, None);
 /// // in doctest, cfg is doctest, not test
-/// assert_eq!(foo.f_test, 1);
-/// assert_eq!(foo.db.unwrap().url, "url");
+/// assert_eq!(foo.test_value, 1);
+/// assert_eq!(foo.nested.url, "url");
 /// ```
 #[proc_macro_derive(EnvMan, attributes(envman))]
 pub fn derive_envman(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
