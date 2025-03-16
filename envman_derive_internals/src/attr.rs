@@ -1,4 +1,5 @@
 use crate::{check_duplicate, require_lit_str, EnvManStructArgs};
+use convert_case::Casing;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{punctuated::Punctuated, spanned::Spanned, Expr, Meta, Token, Type};
@@ -92,7 +93,7 @@ pub(crate) fn attr(
                     .as_ref()
                     .ok_or_else(|| syn::Error::new_spanned(field, "field must have a name"))?,
             );
-            name = struct_arg.rename_all.apply_to_field(name);
+            name = name.to_case(struct_arg.rename_all);
             if let Some(prefix) = &struct_arg.prefix {
                 name = format!("{prefix}{name}");
             };

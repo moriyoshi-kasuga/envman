@@ -1,13 +1,11 @@
-use std::str::FromStr;
-
 use crate::{check_duplicate, require_lit_str, EnvManStructArgs};
 
-use ident_case::RenameRule;
+use convert_case::Case;
 use syn::{punctuated::Punctuated, spanned::Spanned, Meta, Token};
 
 /// Find the value of a #[envman(rename_all = "...")] attribute.
 pub(crate) fn struct_attr(derive: &syn::DeriveInput) -> syn::Result<EnvManStructArgs> {
-    let mut rename_all: Option<RenameRule> = None;
+    let mut rename_all: Option<Case> = None;
     let mut prefix: Option<String> = None;
     let mut suffix: Option<String> = None;
 
@@ -26,8 +24,8 @@ pub(crate) fn struct_attr(derive: &syn::DeriveInput) -> syn::Result<EnvManStruct
                     let string = require_lit_str(&meta, &meta.value)?;
 
                     rename_all = Some(
-                        RenameRule::from_str(&string)
-                            .map_err(|_| syn::Error::new(meta.span(), "invalid RenameRule"))?,
+                        from_str_to_case(&string)
+                            .ok_or_else(|| syn::Error::new(meta.span(), "invalid rename_all"))?,
                     );
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("prefix") => {
@@ -49,8 +47,24 @@ pub(crate) fn struct_attr(derive: &syn::DeriveInput) -> syn::Result<EnvManStruct
         }
     }
     Ok(EnvManStructArgs {
-        rename_all: rename_all.unwrap_or(RenameRule::ScreamingSnakeCase),
+        rename_all: rename_all.unwrap_or(Case::UpperSnake),
         prefix,
         suffix,
     })
+}
+
+pub(crate) fn from_str_to_case(text: &str) -> Option<Case> {
+    let case = match text {
+        "lowercase" => Case::Lower,
+        "UPPERCASE" => Case::Upper,
+        "PascalCase" => Case::Pascal,
+        "camelCase" => Case::Camel,
+        "snake_case" => Case::Snake,
+        "SCREAMING_SNAKE_CASE" => Case::UpperSnake,
+        "kebab-case" => Case::Kebab,
+        "SCREAMING-KEBAB-CASE" => Case::UpperKebab,
+        _ => return None,
+    };
+
+    Some(case)
 }

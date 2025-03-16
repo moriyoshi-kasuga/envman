@@ -1,4 +1,4 @@
-use ident_case::RenameRule;
+use convert_case::Case;
 use proc_macro2::TokenStream;
 
 mod attr;
@@ -6,7 +6,7 @@ mod derive;
 mod struct_attr;
 
 struct EnvManStructArgs {
-    pub rename_all: RenameRule,
+    pub rename_all: Case,
     pub prefix: Option<String>,
     pub suffix: Option<String>,
 }
@@ -28,9 +28,6 @@ fn derive_envman_internal(
     input: &syn::DeriveInput,
     fields: &syn::FieldsNamed,
 ) -> syn::Result<TokenStream> {
-    let ident = &input.ident;
-    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-
     let attr_arg = struct_attr::struct_attr(input)?;
 
     let field_name = fields.named.iter().map(|f| &f.ident).collect::<Vec<_>>();
@@ -43,6 +40,9 @@ fn derive_envman_internal(
         .into_iter()
         .map(derive::derive)
         .collect::<syn::Result<Vec<_>>>()?;
+
+    let ident = &input.ident;
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     let expr = quote::quote! {
         impl #impl_generics envman::EnvMan for #ident #ty_generics #where_clause {
