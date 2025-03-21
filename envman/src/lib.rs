@@ -1,11 +1,9 @@
 #![doc = include_str!(concat!("../", std::env!("CARGO_PKG_README")))]
 pub use envman_derive::EnvMan;
 
-pub trait EnvMan {
+pub trait EnvMan: Sized {
     /// Load environment variables
-    fn load() -> Result<Self, EnvManError>
-    where
-        Self: std::marker::Sized;
+    fn load() -> Result<Self, EnvManError>;
 }
 
 /// Error type for [`EnvMan`]
