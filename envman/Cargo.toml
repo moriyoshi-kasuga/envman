@@ -23,7 +23,6 @@ envman_derive = { version = "^1", path = "../envman_derive", optional = true }
 
 thiserror.workspace = true
 
-
 [lints]
 workspace = true
 
