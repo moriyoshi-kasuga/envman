@@ -53,7 +53,7 @@ pub(crate) fn struct_attr(derive: &syn::DeriveInput) -> syn::Result<EnvManStruct
     })
 }
 
-pub(crate) fn from_str_to_case(text: &str) -> Option<Case> {
+pub(crate) fn from_str_to_case(text: &str) -> Option<Case<'static>> {
     let case = match text {
         "lowercase" => Case::Lower,
         "UPPERCASE" => Case::Upper,

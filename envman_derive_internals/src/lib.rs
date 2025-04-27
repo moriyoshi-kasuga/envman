@@ -6,7 +6,7 @@ mod derive;
 mod struct_attr;
 
 struct EnvManStructArgs {
-    pub rename_all: Case,
+    pub rename_all: Case<'static>,
     pub prefix: Option<String>,
     pub suffix: Option<String>,
 }
