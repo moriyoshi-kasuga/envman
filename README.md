@@ -42,21 +42,21 @@ struct DatabaseConfig {
     port: u16,
 }
 
-fn main() {
-    unsafe {
-        std::env::set_var("APP_PORT", "5000");
-        std::env::set_var("DB_HOST", "192.168.1.1");
-        std::env::set_var("DB_PORT", "5432");
-    }
-    
-    // Load the configuration from environment variables
-    let config = Config::load().expect("Failed to load configuration");
-
-    // Assertions to verify the configuration
-    assert_eq!(config.port, 5000);
-    assert_eq!(config.database.host.to_string(), "192.168.1.1");
-    assert_eq!(config.database.port, 5432);
+// NOTE: This is for demonstration purposes only in README.
+// In real applications, set environment variables through your system or .env files.
+unsafe {
+    std::env::set_var("APP_PORT", "5000");
+    std::env::set_var("DB_HOST", "192.168.1.1");
+    std::env::set_var("DB_PORT", "5432");
 }
+
+// Load the configuration from environment variables
+let config = Config::load().expect("Failed to load configuration");
+
+// Assertions to verify the configuration
+assert_eq!(config.port, 5000);
+assert_eq!(config.database.host.to_string(), "192.168.1.1");
+assert_eq!(config.database.port, 5432);
 ```
 
 ## Attributes

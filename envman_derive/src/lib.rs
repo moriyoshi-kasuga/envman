@@ -9,7 +9,7 @@ use syn::{parse_macro_input, DeriveInput};
 ///
 /// # Struct Attributes:
 ///
-/// ### rename_all: `rename_all = "rule"` (default: SCREAMING-KEBAB-CASE)
+/// ### rename_all: `rename_all = "rule"` (default: SCREAMING_SNAKE_CASE)
 /// Applies to all fields.
 ///
 /// The possible values are ("lowercase", "UPPERCASE", "PascalCase", "camelCase",
