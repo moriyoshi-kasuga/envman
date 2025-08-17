@@ -20,12 +20,6 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> syn::Result<proc_macro2::TokenStr
                 "`parser` is not allowed when `nest` is true",
             ));
         }
-        if alltime_parse {
-            return Err(syn::Error::new_spanned(
-                alltime_parse,
-                "`alltime_parse` is not allowed when `nest` is true",
-            ));
-        }
 
         let load = quote! {
             envman::EnvMan::load()

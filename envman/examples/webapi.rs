@@ -15,8 +15,8 @@ fn main() {
 
 #[derive(EnvMan)]
 pub struct Environments {
-    #[envman(default = "127.0.0.1:8080", alltime_parse)]
+    #[envman(default = "127.0.0.1:8080")]
     pub api_url: SocketAddr,
-    #[envman(test = "secret".to_string())]
+    #[envman(test = "secret")]
     pub jwt_secret: String,
 }

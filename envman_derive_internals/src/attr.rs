@@ -35,10 +35,6 @@ pub(crate) fn attr(
 
         for meta in nested {
             match meta {
-                Meta::Path(ref path) if path.is_ident("alltime_parse") => {
-                    check_duplicate!(path.span(), alltime_parse, alltime_parse);
-                    alltime_parse = true;
-                }
                 Meta::NameValue(meta) if meta.path.is_ident("rename") => {
                     check_duplicate!(meta.span(), rename);
 
@@ -54,6 +50,12 @@ pub(crate) fn attr(
                 Meta::NameValue(meta) if meta.path.is_ident("default") => {
                     check_duplicate!(meta.span(), default);
 
+                    if let Expr::Lit(expr_lit) = &meta.value {
+                        if let syn::Lit::Str(_) = &expr_lit.lit {
+                            alltime_parse = true;
+                        }
+                    }
+
                     default = Some(meta.value.into_token_stream())
                 }
                 Meta::Path(ref path) if path.is_ident("test") => {
@@ -63,6 +65,12 @@ pub(crate) fn attr(
                 }
                 Meta::NameValue(meta) if meta.path.is_ident("test") => {
                     check_duplicate!(meta.span(), test);
+
+                    if let Expr::Lit(expr_lit) = &meta.value {
+                        if let syn::Lit::Str(_) = &expr_lit.lit {
+                            alltime_parse = true;
+                        }
+                    }
 
                     test = Some(meta.value.into_token_stream())
                 }
@@ -107,9 +115,9 @@ pub(crate) fn attr(
         name,
         default,
         test,
+        alltime_parse,
         is_option: is_option(&field.ty),
         parser,
-        alltime_parse,
         nest,
     })
 }

@@ -38,7 +38,7 @@ struct Config {
 #[derive(EnvMan)]
 #[envman(prefix = "DB_",)]
 struct DatabaseConfig {
-    #[envman(default = "127.0.0.1", alltime_parse)]
+    #[envman(default = "127.0.0.1")]
     host: IpAddr,
     #[envman(default = 5432)]
     port: u16,

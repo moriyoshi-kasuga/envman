@@ -5,7 +5,7 @@ struct TestOption {
     /// No error is returned even if the value is missing. Returned is None
     secret_1: Option<String>,
     /// Default is available just in case
-    #[envman(default = "5".to_string())]
+    #[envman(default = "5")]
     secret_2: Option<String>,
 }
 

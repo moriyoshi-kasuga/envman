@@ -49,10 +49,6 @@ use syn::{parse_macro_input, DeriveInput};
 /// - default_flag: `default` (Equivalent to the code below)
 /// - default_expr: `default = Default::default()` (put any expression)
 ///
-/// ### alltime_parse: `alltime_parse` (default: false)
-/// The normal default (and test) return value is the field type.
-/// If this is set, the return value is a string and the parser is used.
-///
 /// ### nest: `nest` (default: false)
 /// If the field implements `envman::EnvMan`, it will be parsed as a struct.
 ///
@@ -65,7 +61,7 @@ use syn::{parse_macro_input, DeriveInput};
 ///   normal: i32,
 ///   #[envman(rename = "renamed")]
 ///   so_long_name: u8,
-///   #[envman(default = "default value".to_string())]
+///   #[envman(default = "default value")]
 ///   default: String,
 ///   wrapped: Option<i32>,
 ///   #[envman(default = 1, test = 2)]
