@@ -19,7 +19,7 @@ default = ["derive"]
 derive = ["dep:envman_derive"]
 
 [dependencies]
-envman_derive = { version = "^1", path = "../envman_derive", optional = true }
+envman_derive = { version = "^2", path = "../envman_derive", optional = true }
 
 thiserror.workspace = true
 
