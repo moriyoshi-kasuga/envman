@@ -1,3 +1,11 @@
+#![deny(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::print_stdout,
+    clippy::print_stderr
+)]
+
 use convert_case::Case;
 use proc_macro2::TokenStream;
 

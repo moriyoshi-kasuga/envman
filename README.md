@@ -44,6 +44,7 @@ struct DatabaseConfig {
 
 // NOTE: This is for demonstration purposes only in README.
 // In real applications, set environment variables through your system or .env files.
+#[allow(unused_unsafe)]
 unsafe {
     std::env::set_var("APP_PORT", "5000");
     std::env::set_var("DB_HOST", "192.168.1.1");

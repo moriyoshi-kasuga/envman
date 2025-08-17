@@ -8,9 +8,7 @@ struct TestRenameAll {
 
 #[test]
 fn rename_all() {
-    unsafe {
-        std::env::set_var("db-url-main", "mysql://example.1");
-    }
+    std::env::set_var("db-url-main", "mysql://example.1");
     assert_eq!(
         TestRenameAll::load().unwrap(),
         TestRenameAll {

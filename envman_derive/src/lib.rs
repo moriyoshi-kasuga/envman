@@ -1,3 +1,11 @@
+#![deny(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::print_stdout,
+    clippy::print_stderr
+)]
+
 use syn::{parse_macro_input, DeriveInput};
 
 /// Automatically implements [`envman::EnvMan`]
@@ -72,6 +80,7 @@ use syn::{parse_macro_input, DeriveInput};
 ///   url: String,
 /// }
 ///
+/// #[allow(unused_unsafe)]
 /// unsafe {
 ///     std::env::set_var("NORMAL", "1");
 ///     // rename attribute is not affected by rename_all, prefix, and suffix

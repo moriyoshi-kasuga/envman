@@ -29,10 +29,8 @@ impl Default for BackEndConfig {
 
 #[test]
 fn nest() {
-    unsafe {
-        std::env::set_var("SERVER_IP", "127.0.0.1:80");
-        std::env::set_var("BACKEND_IP", "127.0.0.1:5000");
-    }
+    std::env::set_var("SERVER_IP", "127.0.0.1:80");
+    std::env::set_var("BACKEND_IP", "127.0.0.1:5000");
 
     // Not Set 'BACKEND_KIND', backend is Default
     assert_eq!(
@@ -46,9 +44,7 @@ fn nest() {
         TestNest::load().unwrap()
     );
 
-    unsafe {
-        std::env::set_var("BACKEND_KIND", "5");
-    }
+    std::env::set_var("BACKEND_KIND", "5");
 
     assert_eq!(
         TestNest {

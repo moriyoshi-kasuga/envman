@@ -13,10 +13,9 @@ struct TestRename {
 
 #[test]
 fn rename() {
-    unsafe {
-        std::env::set_var("CORE_DB_URL", "mysql://example.1");
-        std::env::set_var("transaction_db_url", "mysql://example.2");
-    }
+    std::env::set_var("CORE_DB_URL", "mysql://example.1");
+    std::env::set_var("transaction_db_url", "mysql://example.2");
+
     assert_eq!(
         TestRename::load().unwrap(),
         TestRename {

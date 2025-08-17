@@ -13,11 +13,10 @@ struct TestNormal {
 
 #[test]
 fn normal() {
-    unsafe {
-        std::env::set_var("DB_URL", "mysql://example");
-        std::env::set_var("DB_IP", "127.0.0.1:80");
-        std::env::set_var("DB_MAX_CONN", "5");
-    }
+    std::env::set_var("DB_URL", "mysql://example");
+    std::env::set_var("DB_IP", "127.0.0.1:80");
+    std::env::set_var("DB_MAX_CONN", "5");
+
     assert_eq!(
         TestNormal::load().unwrap(),
         TestNormal {

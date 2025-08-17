@@ -1,23 +1,17 @@
 #![allow(clippy::print_stdout, clippy::unwrap_used)]
 
-use std::{net::SocketAddr, sync::LazyLock};
+use std::net::SocketAddr;
 
 use envman::EnvMan;
 
 fn main() {
-    // this unsafe block is necessary for test
-    // and it is not necessary in production
-    unsafe {
-        std::env::set_var("JWT_SECRET", "secret");
-    }
+    std::env::set_var("JWT_SECRET", "secret");
 
     // initialize
-    let _ = &*ENVIRONMENTS;
+    let environments = Environments::load().unwrap();
 
-    println!("API_URL: {}", ENVIRONMENTS.api_url);
+    println!("API_URL: {}", environments.api_url);
 }
-
-pub static ENVIRONMENTS: LazyLock<Environments> = LazyLock::new(|| Environments::load().unwrap());
 
 #[derive(EnvMan)]
 pub struct Environments {
