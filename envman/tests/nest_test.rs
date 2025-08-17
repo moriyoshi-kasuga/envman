@@ -41,7 +41,7 @@ fn nest() {
                 backend_kind: 0
             })
         },
-        TestNest::load().unwrap()
+        TestNest::load_from_env().unwrap()
     );
 
     std::env::set_var("BACKEND_KIND", "5");
@@ -54,6 +54,6 @@ fn nest() {
                 backend_kind: 5
             })
         },
-        TestNest::load().unwrap()
+        TestNest::load_from_env().unwrap()
     );
 }

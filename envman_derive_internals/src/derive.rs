@@ -21,27 +21,27 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> syn::Result<proc_macro2::TokenStr
             ));
         }
 
-        let load = quote! {
-            envman::EnvMan::load()
+        let load_from_env = quote! {
+            envman::EnvMan::load_from_env()
         };
 
         let token = if is_option {
             if default.is_some() {
                 quote! {
-                    #load.ok().or_else(|| Some(#default))
+                    #load_from_env.ok().or_else(|| Some(#default))
                 }
             } else {
                 quote! {
-                    #load.ok()
+                    #load_from_env.ok()
                 }
             }
         } else if default.is_some() {
             quote! {
-                #load.unwrap_or_else(|_| #default)
+                #load_from_env.unwrap_or_else(|_| #default)
             }
         } else {
             quote! {
-                #load?
+                #load_from_env?
             }
         };
 

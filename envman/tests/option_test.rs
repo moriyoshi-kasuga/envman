@@ -12,7 +12,7 @@ struct TestOption {
 #[test]
 fn option() {
     assert_eq!(
-        TestOption::load().unwrap(),
+        TestOption::load_from_env().unwrap(),
         TestOption {
             secret_1: None,
             secret_2: Some(String::from("5"))

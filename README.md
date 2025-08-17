@@ -54,7 +54,7 @@ unsafe {
 }
 
 // Load the configuration from environment variables
-let config = Config::load().expect("Failed to load configuration");
+let config = Config::load_from_env().expect("Failed to load configuration");
 
 // Assertions to verify the configuration
 assert_eq!(config.port, 5000);

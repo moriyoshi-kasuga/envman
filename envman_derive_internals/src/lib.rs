@@ -54,7 +54,7 @@ fn derive_envman_internal(
 
     let expr = quote::quote! {
         impl #impl_generics envman::EnvMan for #ident #ty_generics #where_clause {
-            fn load() -> Result<Self, envman::EnvManError> {
+            fn load_from_env() -> Result<Self, envman::EnvManError> {
                 Ok(Self { #( #field_name: #body, )* })
             }
         }

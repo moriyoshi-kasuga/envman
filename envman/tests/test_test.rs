@@ -13,7 +13,7 @@ struct TestTestValue {
 #[test]
 fn test_value() {
     assert_eq!(
-        TestTestValue::load().unwrap(),
+        TestTestValue::load_from_env().unwrap(),
         TestTestValue {
             secret_1: String::from("2"),
             secret_2: String::from("3")

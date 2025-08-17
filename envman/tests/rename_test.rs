@@ -17,7 +17,7 @@ fn rename() {
     std::env::set_var("transaction_db_url", "mysql://example.2");
 
     assert_eq!(
-        TestRename::load().unwrap(),
+        TestRename::load_from_env().unwrap(),
         TestRename {
             db_url_1: String::from("mysql://example.1"),
             db_url_2: String::from("mysql://example.2")

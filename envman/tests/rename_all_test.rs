@@ -10,7 +10,7 @@ struct TestRenameAll {
 fn rename_all() {
     std::env::set_var("db-url-main", "mysql://example.1");
     assert_eq!(
-        TestRenameAll::load().unwrap(),
+        TestRenameAll::load_from_env().unwrap(),
         TestRenameAll {
             url: String::from("mysql://example.1"),
         }

@@ -12,7 +12,7 @@ pub use envman_derive::EnvMan;
 
 pub trait EnvMan: Sized {
     /// Load environment variables
-    fn load() -> Result<Self, EnvManError>;
+    fn load_from_env() -> Result<Self, EnvManError>;
 }
 
 /// Error type for [`EnvMan`]

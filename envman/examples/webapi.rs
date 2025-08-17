@@ -8,7 +8,7 @@ fn main() {
     std::env::set_var("JWT_SECRET", "secret");
 
     // initialize
-    let environments = Environments::load().unwrap();
+    let environments = Environments::load_from_env().unwrap();
 
     println!("API_URL: {}", environments.api_url);
 }

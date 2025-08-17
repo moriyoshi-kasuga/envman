@@ -17,7 +17,7 @@ fn normal() {
     std::env::set_var("DB_MAX_CONN", "5");
 
     assert_eq!(
-        TestNormal::load().unwrap(),
+        TestNormal::load_from_env().unwrap(),
         TestNormal {
             db_url: String::from("mysql://example"),
             db_ip: SocketAddr::from_str("127.0.0.1:80").unwrap(),

@@ -84,7 +84,7 @@ use syn::{parse_macro_input, DeriveInput};
 ///     std::env::set_var("DB_URL", "url");
 /// }
 ///
-/// let foo = Foo::load().unwrap();
+/// let foo = Foo::load_from_env().unwrap();
 /// assert_eq!(foo.normal, 1);
 /// assert_eq!(foo.so_long_name, 2);
 /// assert_eq!(foo.default, "default value");

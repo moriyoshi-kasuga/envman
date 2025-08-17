@@ -12,7 +12,7 @@ struct TestDefault {
 #[test]
 fn default() {
     assert_eq!(
-        TestDefault::load().unwrap(),
+        TestDefault::load_from_env().unwrap(),
         TestDefault {
             redis_url: String::from("redis://example"),
             redis_max_conn: 5
