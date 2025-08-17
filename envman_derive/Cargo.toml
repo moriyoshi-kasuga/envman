@@ -22,5 +22,5 @@ syn = { workspace = true, default-features = false, features = [
 ] }
 
 [dev-dependencies]
-envman = { version = "^2", path = "../envman" }
-envman_derive = { version = "^2", path = "../envman_derive" }
+envman_derive = { path = "." }
+thiserror.workspace = true

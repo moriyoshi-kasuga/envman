@@ -54,7 +54,11 @@ use syn::{parse_macro_input, DeriveInput};
 ///
 /// # Example
 /// ```rust
-/// use envman::EnvMan;
+/// # use envman_derive::EnvMan;
+/// # mod envman {
+/// #   include!("../../envman/src/def.rs");
+/// # }
+/// # use envman::EnvMan;
 ///
 /// #[derive(EnvMan)]
 /// struct Foo {
