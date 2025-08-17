@@ -13,7 +13,9 @@ EnvMan is a Rust crate that provides a procedural macro to simplify the manageme
 ## Features
 
 - **Automatic Environment Variable Loading**: Automatically load environment variables into struct fields.
-- **Customizable Field Attributes**: Use attributes to customize field names, parsers, default values, and more.
+- **Customizable Field Attributes**: Use attributes to customize field names, parsers, default values, and nested structures efficiently, now with centralized error handling.
+- **Improved Parsing Mechanism**: Attributes are parsed using a unified configuration builder for better error reporting and validation.
+- **Enhanced Error Context**: Provides precise error messages, including problematic field names and attributes.
 - **Support for Nested Structs**: Easily manage nested configurations with support for nested structs.
 - **Flexible Naming Conventions**: Use `rename_all`, `prefix`, and `suffix` to control environment variable naming.
 
@@ -74,7 +76,6 @@ assert_eq!(config.database.port, 5432);
 - **`default`**: Provide a default value if the environment variable is not set.
 - **`parser`**: Use a custom parser function to parse the environment variable. (default: `FromStr::from_str`)
 - **`nest`**: Indicate that the field is a nested struct implementing `EnvMan`.
-- **`alltime_parse`**: Always use the specified parser to parse the environment variable, even if a default value is provided.
 
 ## More Info
 
