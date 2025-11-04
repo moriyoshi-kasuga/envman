@@ -12,6 +12,9 @@ pub(crate) struct EnvManFieldArgs {
     pub alltime_parse: bool,
     pub is_option: bool,
     pub nest: bool,
+    pub separator: Option<String>,
+    pub validate: Option<TokenStream>,
+    pub secret: bool,
 }
 
 /// Find the value of a #[envman(name = "...")] attribute.
@@ -25,6 +28,9 @@ pub(crate) fn attr(
     let mut test: Option<TokenStream> = None;
     let mut alltime_parse = false;
     let mut nest = false;
+    let mut separator: Option<String> = None;
+    let mut validate: Option<TokenStream> = None;
+    let mut secret = false;
 
     for attr in &field.attrs {
         if !attr.path().is_ident("envman") {
@@ -88,6 +94,27 @@ pub(crate) fn attr(
                     check_duplicate!(path.span(), nest, nest);
                     nest = true;
                 }
+                Meta::NameValue(meta) if meta.path.is_ident("separator") => {
+                    check_duplicate!(meta.span(), separator);
+
+                    let string = require_lit_str(&meta, &meta.value)?;
+
+                    separator = Some(string);
+                }
+                Meta::NameValue(meta) if meta.path.is_ident("validate") => {
+                    check_duplicate!(meta.span(), validate);
+
+                    if let Expr::Path(path) = &meta.value {
+                        validate = Some(path.to_token_stream());
+                        continue;
+                    }
+
+                    return Err(syn::Error::new_spanned(meta, "expected path"));
+                }
+                Meta::Path(ref path) if path.is_ident("secret") => {
+                    check_duplicate!(path.span(), secret, secret);
+                    secret = true;
+                }
                 _ => return Err(syn::Error::new_spanned(meta, "unexpected attribute")),
             }
         }
@@ -119,6 +146,9 @@ pub(crate) fn attr(
         is_option: is_option(&field.ty),
         parser,
         nest,
+        separator,
+        validate,
+        secret,
     })
 }
 

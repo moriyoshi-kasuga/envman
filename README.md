@@ -13,9 +13,11 @@ EnvMan is a Rust crate that provides a procedural macro to simplify the manageme
 ## Features
 
 - **Automatic Environment Variable Loading**: Automatically load environment variables into struct fields.
-- **Customizable Field Attributes**: Use attributes to customize field names, parsers, default values, and nested structures efficiently, now with centralized error handling.
-- **Improved Parsing Mechanism**: Attributes are parsed using a unified configuration builder for better error reporting and validation.
-- **Enhanced Error Context**: Provides precise error messages, including problematic field names and attributes.
+- **Array/Vec Support**: Parse comma-separated or custom-delimited values into vectors using the `separator` attribute.
+- **Validation**: Custom validation functions to ensure values meet your requirements.
+- **Enhanced Error Messages**: Detailed error messages showing the key name, actual value, and expected type for easier debugging.
+- **Secret Masking**: Protect sensitive data in debug output with the `EnvManDebug` derive macro and `secret` attribute.
+- **Customizable Field Attributes**: Use attributes to customize field names, parsers, default values, and nested structures efficiently.
 - **Support for Nested Structs**: Easily manage nested configurations with support for nested structs.
 - **Flexible Naming Conventions**: Use `rename_all`, `prefix`, and `suffix` to control environment variable naming.
 
@@ -76,6 +78,81 @@ assert_eq!(config.database.port, 5432);
 - **`default`**: Provide a default value if the environment variable is not set.
 - **`parser`**: Use a custom parser function to parse the environment variable. (default: `FromStr::from_str`)
 - **`nest`**: Indicate that the field is a nested struct implementing `EnvMan`.
+- **`separator`**: For `Vec<T>` fields, specify the delimiter to split the string (e.g., `separator = ","` for comma-separated values).
+- **`validate`**: Specify a custom validation function that returns `Result<(), E>` where `E: Display`. The error message will be included in the validation failure.
+- **`secret`**: Mark a field as secret to mask its value in debug output (requires `EnvManDebug` derive).
+
+## Advanced Examples
+
+### Array/Vec Support
+
+Parse comma-separated or custom-delimited values into vectors:
+
+```rust,no_run
+use envman::EnvMan;
+
+#[derive(EnvMan)]
+struct Config {
+    // Comma-separated tags: "rust,cargo,testing"
+    #[envman(separator = ",")]
+    tags: Vec<String>,
+    
+    // Colon-separated ports: "8080:9090:3000"
+    #[envman(separator = ":")]
+    ports: Vec<u16>,
+    
+    // Optional array
+    #[envman(separator = ",")]
+    categories: Option<Vec<String>>,
+}
+```
+
+### Validation
+
+Ensure values meet your requirements with custom validation:
+
+```rust,no_run
+use envman::EnvMan;
+
+fn validate_port(port: &u16) -> Result<(), String> {
+    if *port < 1024 {
+        Err(format!("Port {} is reserved (must be >= 1024)", port))
+    } else if *port > 65535 {
+        Err(format!("Port {} is invalid (must be <= 65535)", port))
+    } else {
+        Ok(())
+    }
+}
+
+#[derive(EnvMan)]
+struct Config {
+    #[envman(validate = validate_port)]
+    port: u16,
+}
+```
+
+### Secret Masking
+
+Protect sensitive data in debug output:
+
+```rust,no_run
+use envman::{EnvMan, EnvManDebug};
+
+#[derive(EnvMan, EnvManDebug)]
+struct Config {
+    username: String,
+    
+    #[envman(secret)]
+    password: String,
+    
+    #[envman(secret)]
+    api_key: String,
+}
+
+let config = Config::load_from_env().unwrap();
+// Debug output will show: Config { username: "admin", password: "***", api_key: "***" }
+println!("{:?}", config);
+```
 
 ## More Info
 

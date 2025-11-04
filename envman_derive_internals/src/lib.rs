@@ -10,6 +10,7 @@ use convert_case::Case;
 use proc_macro2::TokenStream;
 
 mod attr;
+mod debug_derive;
 mod derive;
 mod struct_attr;
 
@@ -30,6 +31,10 @@ pub fn derive_envman(input: syn::DeriveInput) -> syn::Result<TokenStream> {
             "currently only structs with named fields are supported",
         )),
     }
+}
+
+pub fn derive_envman_debug(input: syn::DeriveInput) -> syn::Result<TokenStream> {
+    debug_derive::derive_debug(&input)
 }
 
 fn derive_envman_internal(

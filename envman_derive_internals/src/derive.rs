@@ -11,6 +11,9 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> syn::Result<proc_macro2::TokenStr
         alltime_parse,
         is_option,
         nest,
+        separator,
+        validate,
+        secret: _,
     } = args;
 
     if nest {
@@ -62,44 +65,91 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> syn::Result<proc_macro2::TokenStr
         None => quote! { std::str::FromStr::from_str },
     };
 
-    macro_rules! parse {
-        ($token:ident) => {
-            quote! { #parser(#$token).map_err(|err| envman::EnvManError::Parse { key: #name, source: Box::new(err) })? }
-        };
-    }
-
-    macro_rules! alltime_parse {
-        ($token:ident) => {
-            if alltime_parse {
-                parse!($token)
-            } else {
-                quote! { #$token }
+    // Handle separator (for Vec/array types)
+    let parse_with_separator = if let Some(sep) = separator {
+        quote! {
+            {
+                let parts: Vec<&str> = val.split(#sep).collect();
+                let mut results = Vec::new();
+                for part in parts {
+                    let parsed = #parser(part.trim()).map_err(|err| envman::EnvManError::Parse {
+                        key: #name,
+                        value: part.to_string(),
+                        expected_type: std::any::type_name::<Self>(),
+                        source: Box::new(err)
+                    })?;
+                    results.push(parsed);
+                }
+                results
             }
-        };
-    }
-
-    macro_rules! wrap_opt {
-        ($token:ident) => {
-            if is_option {
-                quote! { Some(#$token) }
-            } else {
-                quote! { #$token }
-            }
-        };
-    }
-
-    let val = quote! { &val };
-
-    let ok = {
-        let temp = parse!(val);
-        let temp = wrap_opt!(temp);
-        quote! { #temp }
+        }
+    } else {
+        quote! {
+            #parser(&val).map_err(|err| envman::EnvManError::Parse {
+                key: #name,
+                value: val.clone(),
+                expected_type: std::any::type_name::<Self>(),
+                source: Box::new(err)
+            })?
+        }
     };
 
-    let default = match default {
-        Some(default) => {
-            let token_parse = alltime_parse!(default);
-            wrap_opt!(token_parse)
+    // Handle validation
+    let validation_code = if let Some(validator) = validate {
+        quote! {
+            match #validator(&parsed_value) {
+                Ok(_) => {},
+                Err(e) => {
+                    return Err(envman::EnvManError::Validation {
+                        key: #name,
+                        value: val.clone(),
+                        message: format!("{}", e),
+                    });
+                }
+            }
+        }
+    } else {
+        quote! {}
+    };
+
+    let ok = if is_option {
+        quote! {
+            Some({
+                let parsed_value = #parse_with_separator;
+                #validation_code
+                parsed_value
+            })
+        }
+    } else {
+        quote! {
+            {
+                let parsed_value = #parse_with_separator;
+                #validation_code
+                parsed_value
+            }
+        }
+    };
+
+    let default_value = match default {
+        Some(ref default_expr) => {
+            let parsed_default = if alltime_parse {
+                quote! {
+                    {
+                        let val = #default_expr.to_string();
+                        let parsed_value = #parse_with_separator;
+                        #validation_code
+                        parsed_value
+                    }
+                }
+            } else {
+                quote! { #default_expr }
+            };
+
+            if is_option {
+                quote! { Some(#parsed_default) }
+            } else {
+                parsed_default
+            }
         }
         None => {
             if is_option {
@@ -113,17 +163,34 @@ pub(crate) fn derive(args: EnvManFieldArgs) -> syn::Result<proc_macro2::TokenStr
     let token = quote! {
         match std::env::var(#name) {
             Ok(val) => #ok,
-            Err(_) => #default,
+            Err(_) => #default_value,
         }
     };
 
     match test {
-        Some(test) => {
-            let token_parse = alltime_parse!(test);
-            let test = wrap_opt!(token_parse);
+        Some(ref test_expr) => {
+            let parsed_test = if alltime_parse {
+                quote! {
+                    {
+                        let val = #test_expr.to_string();
+                        let parsed_value = #parse_with_separator;
+                        #validation_code
+                        parsed_value
+                    }
+                }
+            } else {
+                quote! { #test_expr }
+            };
+
+            let test_value = if is_option {
+                quote! { Some(#parsed_test) }
+            } else {
+                parsed_test
+            };
+
             Ok(quote! {
                 if cfg!(test) {
-                    #test
+                    #test_value
                 } else {
                     #token
                 }

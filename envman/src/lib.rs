@@ -8,7 +8,7 @@
 )]
 
 #[cfg(feature = "derive")]
-pub use envman_derive::EnvMan;
+pub use envman_derive::{EnvMan, EnvManDebug};
 
 mod def;
 pub use def::*;

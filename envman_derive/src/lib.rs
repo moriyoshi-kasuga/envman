@@ -36,6 +36,17 @@ use syn::{parse_macro_input, DeriveInput};
 /// ### parser: `parser = utils::default_parser` (default: FromStr::from_str)
 /// Parser type is `fn(&str) -> Result<T, E>` and `E` must implement `std::error::Error`.
 ///
+/// ### separator: `separator = ","` (default: None)
+/// For Vec/array types, split the environment variable by this separator.
+/// Example: `ALLOWED_HOSTS=host1,host2,host3` becomes `vec!["host1", "host2", "host3"]`
+///
+/// ### validate: `validate = my_validator` (default: None)
+/// Custom validation function with signature `fn(&T) -> Result<(), E>` where `E: Display`.
+/// The error message from the Result will be included in the validation error.
+///
+/// ### secret: `secret` (default: false)
+/// Mark this field as secret. When used with `EnvManDebug`, the value will be masked as "***".
+///
 /// ### group_test: (default: None)
 /// If under test, use this value (Priority is first).
 ///
@@ -72,6 +83,8 @@ use syn::{parse_macro_input, DeriveInput};
 ///   test_value: u8,
 ///   #[envman(nest)]
 ///   nested: DbData,
+///   #[envman(separator = ",")]
+///   allowed_hosts: Vec<String>,
 /// }
 ///
 /// #[derive(EnvMan, Default)]
@@ -86,6 +99,7 @@ use syn::{parse_macro_input, DeriveInput};
 ///     // rename attribute is not affected by rename_all, prefix, and suffix
 ///     std::env::set_var("renamed", "2");
 ///     std::env::set_var("DB_URL", "url");
+///     std::env::set_var("ALLOWED_HOSTS", "host1,host2,host3");
 /// }
 ///
 /// let foo = Foo::load_from_env().unwrap();
@@ -96,10 +110,50 @@ use syn::{parse_macro_input, DeriveInput};
 /// // in doctest, cfg is doctest, not test
 /// assert_eq!(foo.test_value, 1);
 /// assert_eq!(foo.nested.url, "url");
+/// assert_eq!(foo.allowed_hosts, vec!["host1", "host2", "host3"]);
 /// ```
 #[proc_macro_derive(EnvMan, attributes(envman))]
 pub fn derive_envman(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     envman_derive_internals::derive_envman(parse_macro_input!(input as DeriveInput))
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+
+/// Derives Debug with masking support for fields marked with `#[envman(secret)]`
+///
+/// # Example
+/// ```rust
+/// # use envman_derive::{EnvMan, EnvManDebug};
+/// # mod envman {
+/// #   include!("../../envman/src/def.rs");
+/// # }
+/// # use envman::EnvMan;
+///
+/// #[derive(EnvMan, EnvManDebug)]
+/// struct Config {
+///     username: String,
+///     #[envman(secret)]
+///     password: String,
+///     #[envman(secret)]
+///     api_key: String,
+/// }
+///
+/// #[allow(unused_unsafe)]
+/// unsafe {
+///     std::env::set_var("USERNAME", "admin");
+///     std::env::set_var("PASSWORD", "secret123");
+///     std::env::set_var("API_KEY", "key_123456");
+/// }
+///
+/// let config = Config::load_from_env().unwrap();
+/// let debug_output = format!("{:?}", config);
+/// assert!(debug_output.contains("username: \"admin\""));
+/// assert!(debug_output.contains("password: \"***\""));
+/// assert!(debug_output.contains("api_key: \"***\""));
+/// ```
+#[proc_macro_derive(EnvManDebug, attributes(envman))]
+pub fn derive_envman_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    envman_derive_internals::derive_envman_debug(parse_macro_input!(input as DeriveInput))
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
 }
